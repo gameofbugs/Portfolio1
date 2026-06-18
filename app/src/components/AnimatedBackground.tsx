@@ -17,7 +17,7 @@ function AnimatedBackground() {
         size: 2 + Math.random() * 4,
         duration: 14 + Math.random() * 18,
         delay: -(Math.random() * 30),
-        opacity: 0.15 + Math.random() * 0.35,
+        opacity: 0.25 + Math.random() * 0.4,
         color: isYellow ? "#FFD600" : "#F7931A",
       };
     });
@@ -25,9 +25,9 @@ function AnimatedBackground() {
 
   return (
     <div className="ambient-bg" aria-hidden="true">
-      <div className="ambient-orb ambient-orb-1" style={{ top: "-8%", left: "-6%", width: 460, height: 460, background: "#F7931A", opacity: 0.07 }} />
-      <div className="ambient-orb ambient-orb-2" style={{ top: "35%", right: "-10%", width: 520, height: 520, background: "#FFD600", opacity: 0.045 }} />
-      <div className="ambient-orb ambient-orb-3" style={{ bottom: "-12%", left: "20%", width: 420, height: 420, background: "#EA580C", opacity: 0.06 }} />
+      <div className="ambient-orb ambient-orb-1" style={{ top: "-8%", left: "-6%", width: 460, height: 460, background: "#F7931A", opacity: 0.11 }} />
+      <div className="ambient-orb ambient-orb-2" style={{ top: "35%", right: "-10%", width: 520, height: 520, background: "#FFD600", opacity: 0.07 }} />
+      <div className="ambient-orb ambient-orb-3" style={{ bottom: "-12%", left: "20%", width: 420, height: 420, background: "#EA580C", opacity: 0.09 }} />
       {particles.map((p) => (
         <span
           key={p.id}

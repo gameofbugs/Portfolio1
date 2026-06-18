@@ -322,7 +322,7 @@ export default function Portfolio() {
       </section>
 
       {/* ── GAMES ── */}
-      <section id="games" className="section-pad" style={{ padding: "88px 24px", background: "#0A0C10" }}>
+      <section id="games" className="section-pad" style={{ padding: "88px 24px", background: "rgba(10,12,16,0.78)" }}>
         <div className="container">
           <span className="section-label">// Published Games</span>
           <h2 style={{ fontSize: "clamp(26px,4vw,46px)", fontWeight: 700, marginBottom: 52 }}>
@@ -359,7 +359,7 @@ export default function Portfolio() {
       </section>
 
       {/* ── TOOLS ── */}
-      <section id="tools" className="section-pad" style={{ padding: "88px 24px", background: "#030304" }}>
+      <section id="tools" className="section-pad" style={{ padding: "88px 24px" }}>
         <div className="container">
           <span className="section-label">// Tech Stack</span>
           <h2 style={{ fontSize: "clamp(26px,4vw,46px)", fontWeight: 700, marginBottom: 16 }}>
@@ -387,7 +387,7 @@ export default function Portfolio() {
       </section>
 
       {/* ── ABOUT ── */}
-      <section id="about" className="section-pad" style={{ padding: "88px 24px", background: "#0A0C10" }}>
+      <section id="about" className="section-pad" style={{ padding: "88px 24px", background: "rgba(10,12,16,0.78)" }}>
         <div className="container about-grid">
           <div>
             <span className="section-label">// Developer DNA</span>
@@ -423,7 +423,7 @@ export default function Portfolio() {
       </section>
 
       {/* ── CONTACT ── */}
-      <section id="contact" className="section-pad" style={{ padding: "88px 24px", background: "#030304" }}>
+      <section id="contact" className="section-pad" style={{ padding: "88px 24px" }}>
         <div className="container">
           <span className="section-label">// Get In Touch</span>
           <h2 style={{ fontSize: "clamp(26px,4vw,46px)", fontWeight: 700, marginBottom: 16 }}>
