@@ -10,6 +10,7 @@ import {
 } from "../components/Skeletons";
 import SocialIcon from "../components/SocialIcon";
 import GameDetailModal from "../components/GameDetailModal";
+import AnimatedBackground from "../components/AnimatedBackground";
 
 const DEFAULT_DATA = {
   name: "Alex Mercer",
@@ -36,6 +37,25 @@ const CSS = `
   @keyframes spinR { from{transform:rotate(360deg)} to{transform:rotate(0deg)} }
   @keyframes fadeIn { from{opacity:0;transform:translateY(12px)} to{opacity:1;transform:translateY(0)} }
   @keyframes shimmer { 0%{background-position:200% 0} 100%{background-position:-200% 0} }
+  @keyframes orbDrift1 { 0%,100%{transform:translate(0,0)} 50%{transform:translate(70px,-50px)} }
+  @keyframes orbDrift2 { 0%,100%{transform:translate(0,0)} 50%{transform:translate(-60px,60px)} }
+  @keyframes orbDrift3 { 0%,100%{transform:translate(0,0)} 50%{transform:translate(50px,40px)} }
+  @keyframes particleRise {
+    0% { transform: translate(0,0); opacity: 0; }
+    8% { opacity: 1; }
+    25% { transform: translate(18px,-25vh); }
+    50% { transform: translate(-16px,-52vh); }
+    75% { transform: translate(14px,-78vh); }
+    92% { opacity: 1; }
+    100% { transform: translate(0,-112vh); opacity: 0; }
+  }
+
+  .ambient-bg { position: fixed; inset: 0; z-index: -1; overflow: hidden; pointer-events: none; }
+  .ambient-orb { position: absolute; border-radius: 50%; filter: blur(110px); will-change: transform; }
+  .ambient-orb-1 { animation: orbDrift1 26s ease-in-out infinite; }
+  .ambient-orb-2 { animation: orbDrift2 32s ease-in-out infinite; }
+  .ambient-orb-3 { animation: orbDrift3 22s ease-in-out infinite; }
+  .ambient-particle { position: absolute; bottom: -20px; border-radius: 50%; animation-name: particleRise; animation-timing-function: linear; animation-iteration-count: infinite; will-change: transform, opacity; }
 
   .float { animation: float 6s ease-in-out infinite; }
   .float-delay { animation: float 5s ease-in-out 1.2s infinite; }
@@ -124,6 +144,11 @@ const CSS = `
   @media (max-width: 400px) {
     .social-grid { grid-template-columns: 1fr; }
   }
+
+  @media (max-width: 640px) {
+    .ambient-particle:nth-child(even) { display: none; }
+    .ambient-orb { filter: blur(75px); }
+  }
 `;
 
 export default function Portfolio() {
@@ -189,6 +214,7 @@ export default function Portfolio() {
   return (
     <div style={{ minHeight: "100vh", background: "#030304", color: "#fff" }}>
       <style>{CSS}</style>
+      <AnimatedBackground />
 
       {/* ── NAV ── */}
       <nav style={{
