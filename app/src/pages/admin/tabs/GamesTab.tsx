@@ -1,5 +1,6 @@
 // @ts-nocheck
 import ImageUploader from "../../../components/ImageUploader";
+import SingleImageField from "../../../components/SingleImageField";
 
 export default function GamesTab({ games, addGame, saveGame, removeGame, updateGameField, saving, onUploadError }) {
   return (
@@ -25,13 +26,23 @@ export default function GamesTab({ games, addGame, saveGame, removeGame, updateG
               </div>
             </div>
 
+            <div className="field-wrap">
+              <label className="field-label">🖼 Cover Image (shown in the games grid)</label>
+              <SingleImageField
+                gameId={g.id}
+                value={g.cover_image || ""}
+                onChange={(val) => updateGameField(g.id, "cover_image", val)}
+                onError={onUploadError}
+              />
+            </div>
+
             <div className="grid-2">
               <div className="field-wrap">
                 <label className="field-label">Title</label>
                 <input className="field-input" value={g.title} onChange={e => updateGameField(g.id, "title", e.target.value)} />
               </div>
               <div className="field-wrap">
-                <label className="field-label">Cover Emoji</label>
+                <label className="field-label">Cover Emoji (fallback if no image set)</label>
                 <input className="field-input" value={g.cover} onChange={e => updateGameField(g.id, "cover", e.target.value)} style={{ fontSize: 20 }} />
               </div>
               <div className="field-wrap">

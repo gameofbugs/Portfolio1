@@ -9,7 +9,7 @@ import {
   SkeletonSocialCard,
 } from "../components/Skeletons";
 import SocialIcon from "../components/SocialIcon";
-import GameGalleryModal from "../components/GameGalleryModal";
+import GameDetailModal from "../components/GameDetailModal";
 
 const DEFAULT_DATA = {
   name: "Alex Mercer",
@@ -67,19 +67,20 @@ const CSS = `
   .nav-link { font-family: 'JetBrains Mono', monospace; font-size: 12px; letter-spacing: 0.1em; text-transform: uppercase; color: rgba(255,255,255,0.45); background: none; border: none; cursor: pointer; transition: color 0.2s; padding: 4px 2px; text-decoration: none; }
   .nav-link:hover { color: #F7931A; }
 
-  .devlog { overflow: hidden; transition: max-height 0.5s ease, opacity 0.3s ease; }
-  .devlog.open { max-height: 1400px; opacity: 1; }
-  .devlog.closed { max-height: 0; opacity: 0; }
+  .devlog-trigger { font-family: 'JetBrains Mono', monospace; font-size: 11px; color: #F7931A; letterSpacing: 0.08em; }
+
+  .game-card { padding: 0; cursor: pointer; overflow: hidden; display: flex; flex-direction: column; }
+  .game-card-cover { width: 100%; aspect-ratio: 4 / 3; background: linear-gradient(135deg, rgba(247,147,26,0.14), rgba(10,12,16,0.6)); display: flex; align-items: center; justify-content: center; position: relative; overflow: hidden; flex-shrink: 0; }
+  .game-card-cover img { width: 100%; height: 100%; object-fit: cover; display: block; transition: transform 0.4s ease; }
+  .game-card:hover .game-card-cover img { transform: scale(1.06); }
+  .game-card-cover .cover-emoji { font-size: 46px; }
+  .game-card-cover .video-pill { position: absolute; bottom: 10px; right: 10px; background: rgba(0,0,0,0.55); border: 1px solid rgba(255,255,255,0.18); color: #F7931A; font-size: 12px; width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center; }
+  .game-card-body { padding: 22px 22px 24px; display: flex; flex-direction: column; flex: 1; }
+
+  [id] { scroll-margin-top: 84px; }
 
   .skeleton { background: linear-gradient(90deg, #0F1115 25%, #1a1d24 50%, #0F1115 75%); background-size: 200% 100%; animation: shimmer 1.5s infinite; border-radius: 8px; }
   .live-dot { display: inline-flex; align-items: center; gap: 6px; font-family: 'JetBrains Mono', monospace; font-size: 10px; color: #4ade80; letter-spacing: 0.1em; text-transform: uppercase; }
-
-  .thumb-strip { display: flex; gap: 8px; margin: 14px 0 18px; flex-wrap: wrap; }
-  .thumb { width: 56px; height: 56px; border-radius: 9px; overflow: hidden; border: 1px solid rgba(255,255,255,0.1); cursor: pointer; position: relative; flex-shrink: 0; background: #000; }
-  .thumb img { width: 100%; height: 100%; object-fit: cover; display: block; transition: transform 0.25s; }
-  .thumb:hover img { transform: scale(1.08); }
-  .thumb-video { display: flex; align-items: center; justify-content: center; background: rgba(247,147,26,0.12); border-color: rgba(247,147,26,0.3); color: #F7931A; font-size: 18px; }
-  .thumb-more { display: flex; align-items: center; justify-content: center; background: rgba(255,255,255,0.05); color: rgba(255,255,255,0.6); font-family: 'JetBrains Mono', monospace; font-size: 12px; }
 
   .social-card { display: flex; align-items: center; gap: 14px; padding: 18px 20px; text-decoration: none; }
   .social-card .icon-wrap { width: 42px; height: 42px; border-radius: 11px; background: rgba(247,147,26,0.09); border: 1px solid rgba(247,147,26,0.22); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
@@ -90,7 +91,7 @@ const CSS = `
   .hero-grid { display: grid; grid-template-columns: 1fr 300px; gap: 48px; align-items: center; }
   .about-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 72px; align-items: center; }
   .stats-grid { display: grid; grid-template-columns: repeat(3,1fr); }
-  .games-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(340px,1fr)); gap: 24px; }
+  .games-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(270px,1fr)); gap: 24px; align-items: start; }
   .tools-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px,1fr)); gap: 20px; }
   .social-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px,1fr)); gap: 18px; }
   .nav-links { display: flex; align-items: center; gap: 32px; }
@@ -131,8 +132,7 @@ export default function Portfolio() {
   const [tools, setTools] = useState([]);
   const [socialLinks, setSocialLinks] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [openGame, setOpenGame] = useState(null);
-  const [gallery, setGallery] = useState(null); // { game, initialIndex }
+  const [detailGame, setDetailGame] = useState(null);
 
   const loadData = async () => {
     try {
@@ -182,8 +182,7 @@ export default function Portfolio() {
   const scrollTo = (id) => {
     const el = document.getElementById(id);
     if (el) {
-      const top = el.getBoundingClientRect().top + window.scrollY - 72;
-      window.scrollTo({ top, behavior: "smooth" });
+      el.scrollIntoView({ behavior: "smooth", block: "start" });
     }
   };
 
@@ -223,10 +222,10 @@ export default function Portfolio() {
 
       {/* ── HERO ── */}
       <section className="hero-pad" style={{ position: "relative", paddingTop: 140, paddingBottom: 80, paddingLeft: 24, paddingRight: 24, overflow: "hidden" }}>
-        <div className="grid-bg" style={{ position: "absolute", inset: 0, maskImage: "radial-gradient(ellipse at 40% 50%, black 20%, transparent 75%)", WebkitMaskImage: "radial-gradient(ellipse at 40% 50%, black 20%, transparent 75%)" }} />
+        <div className="grid-bg" style={{ position: "absolute", inset: 0, pointerEvents: "none", maskImage: "radial-gradient(ellipse at 40% 50%, black 20%, transparent 75%)", WebkitMaskImage: "radial-gradient(ellipse at 40% 50%, black 20%, transparent 75%)" }} />
         <div style={{ position: "absolute", top: "10%", right: "12%", width: 480, height: 480, background: "#F7931A", opacity: 0.055, borderRadius: "50%", filter: "blur(130px)", pointerEvents: "none" }} />
 
-        <div className="container hero-grid">
+        <div className="container hero-grid" style={{ position: "relative", zIndex: 1 }}>
           {loading ? (
             <SkeletonHero />
           ) : (
@@ -306,88 +305,28 @@ export default function Portfolio() {
           <div className="games-grid">
             {loading
               ? [1, 2, 3, 4].map(i => <SkeletonCard key={i} />)
-              : games.map(g => {
-                const isOpen = openGame === g.id;
-                const images = g.images || [];
-                const visibleThumbs = images.slice(0, 3);
-                const extraCount = images.length - visibleThumbs.length;
-                return (
-                  <div key={g.id} className="card fade-in" style={{ padding: 28, position: "relative", overflow: "hidden" }}>
-                    <div style={{ position: "absolute", right: 16, bottom: 12, fontSize: 52, opacity: 0.07, userSelect: "none", pointerEvents: "none" }}>{g.cover}</div>
-                    <div
-                      style={{ display: "flex", alignItems: "flex-start", gap: 16, marginBottom: 14, cursor: "pointer" }}
-                      onClick={() => setOpenGame(isOpen ? null : g.id)}
-                    >
-                      <div style={{ width: 54, height: 54, borderRadius: 13, background: "rgba(247,147,26,0.09)", border: "1px solid rgba(247,147,26,0.24)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 26, flexShrink: 0 }}>{g.cover}</div>
-                      <div style={{ flex: 1, minWidth: 0 }}>
-                        <h3 style={{ fontSize: 18, fontWeight: 600, marginBottom: 8, lineHeight: 1.2 }}>{g.title}</h3>
-                        <div style={{ display: "flex", flexWrap: "wrap", gap: 5 }}>
-                          <span className="badge badge-o">{g.genre}</span>
-                          <span className="badge badge-g">{g.year}</span>
-                          <span className={`badge ${g.status === "Released" ? "badge-gr" : g.status === "In Development" ? "badge-o" : "badge-mu"}`}>{g.status}</span>
-                        </div>
-                      </div>
-                    </div>
-                    <p style={{ color: "#94A3B8", fontSize: 13, lineHeight: 1.7, marginBottom: images.length || g.video_url ? 4 : 18, cursor: "pointer" }} onClick={() => setOpenGame(isOpen ? null : g.id)}>
-                      {g.description}
-                    </p>
-
-                    {(images.length > 0 || g.video_url) && (
-                      <div className="thumb-strip">
-                        {g.video_url && (
-                          <div
-                            className="thumb thumb-video"
-                            onClick={(e) => { e.stopPropagation(); setGallery({ game: g, initialIndex: 0 }); }}
-                            title="Watch trailer"
-                          >
-                            ▶
-                          </div>
-                        )}
-                        {visibleThumbs.map((url, i) => (
-                          <div
-                            key={i}
-                            className="thumb"
-                            onClick={(e) => { e.stopPropagation(); setGallery({ game: g, initialIndex: (g.video_url ? 1 : 0) + i }); }}
-                          >
-                            <img src={url} alt={`${g.title} screenshot ${i + 1}`} loading="lazy" />
-                          </div>
-                        ))}
-                        {extraCount > 0 && (
-                          <div
-                            className="thumb thumb-more"
-                            onClick={(e) => { e.stopPropagation(); setGallery({ game: g, initialIndex: (g.video_url ? 1 : 0) + visibleThumbs.length }); }}
-                          >
-                            +{extraCount}
-                          </div>
-                        )}
-                      </div>
+              : games.map(g => (
+                <div key={g.id} className="card game-card fade-in" onClick={() => setDetailGame(g)}>
+                  <div className="game-card-cover">
+                    {g.cover_image ? (
+                      <img src={g.cover_image} alt={g.title} loading="lazy" />
+                    ) : (
+                      <span className="cover-emoji">{g.cover}</span>
                     )}
-
-                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: images.length || g.video_url ? 0 : 0, cursor: "pointer" }} onClick={() => setOpenGame(isOpen ? null : g.id)}>
-                      <span style={{ fontFamily: "JetBrains Mono", fontSize: 11, color: "rgba(255,255,255,0.25)", letterSpacing: "0.04em" }}>{g.platform}</span>
-                      <span style={{ fontFamily: "JetBrains Mono", fontSize: 11, color: "#F7931A", letterSpacing: "0.08em", userSelect: "none" }}>
-                        {isOpen ? "▲ CLOSE" : "▼ DETAILS"}
-                      </span>
-                    </div>
-                    <div className={`devlog ${isOpen ? "open" : "closed"}`}>
-                      <div style={{ marginTop: 20, paddingTop: 20, borderTop: "1px solid rgba(255,255,255,0.07)" }}>
-                        {g.detailed_description && (
-                          <>
-                            <span style={{ fontFamily: "JetBrains Mono", fontSize: 10, color: "#F7931A", letterSpacing: "0.15em", textTransform: "uppercase", display: "block", marginBottom: 12 }}>// About This Game</span>
-                            <p style={{ color: "#CBD5E1", fontSize: 13, lineHeight: 1.85, whiteSpace: "pre-line", marginBottom: 22 }}>
-                              {g.detailed_description}
-                            </p>
-                          </>
-                        )}
-                        <span style={{ fontFamily: "JetBrains Mono", fontSize: 10, color: "#F7931A", letterSpacing: "0.15em", textTransform: "uppercase", display: "block", marginBottom: 12 }}>// Challenges &amp; Lessons Learned</span>
-                        <p style={{ color: "#CBD5E1", fontSize: 13, lineHeight: 1.85, whiteSpace: "pre-line" }}>
-                          {g.challenges || "No dev log written yet."}
-                        </p>
-                      </div>
-                    </div>
+                    {g.video_url && <span className="video-pill">▶</span>}
                   </div>
-                );
-              })
+                  <div className="game-card-body">
+                    <h3 style={{ fontSize: 17, fontWeight: 600, marginBottom: 8, lineHeight: 1.25 }}>{g.title}</h3>
+                    <div style={{ display: "flex", flexWrap: "wrap", gap: 5, marginBottom: 12 }}>
+                      <span className="badge badge-o">{g.genre}</span>
+                      <span className="badge badge-g">{g.year}</span>
+                      <span className={`badge ${g.status === "Released" ? "badge-gr" : g.status === "In Development" ? "badge-o" : "badge-mu"}`}>{g.status}</span>
+                    </div>
+                    <p style={{ color: "#94A3B8", fontSize: 13, lineHeight: 1.65, marginBottom: 16, flex: 1 }}>{g.description}</p>
+                    <span className="devlog-trigger">VIEW DETAILS →</span>
+                  </div>
+                </div>
+              ))
             }
           </div>
         </div>
@@ -495,13 +434,10 @@ export default function Portfolio() {
         </p>
       </footer>
 
-      <GameGalleryModal
-        open={!!gallery}
-        onClose={() => setGallery(null)}
-        title={gallery?.game?.title}
-        videoUrl={gallery?.game?.video_url}
-        images={gallery?.game?.images || []}
-        initialIndex={gallery?.initialIndex || 0}
+      <GameDetailModal
+        open={!!detailGame}
+        onClose={() => setDetailGame(null)}
+        game={detailGame}
       />
     </div>
   );
