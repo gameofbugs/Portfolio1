@@ -212,14 +212,14 @@ export default function Portfolio() {
   };
 
   return (
-    <div style={{ minHeight: "100vh", background: "#030304", color: "#fff" }}>
+    <div style={{ minHeight: "100vh", color: "#fff" }}>
       <style>{CSS}</style>
       <AnimatedBackground />
 
       {/* ── NAV ── */}
       <nav style={{
         position: "fixed", top: 0, left: 0, right: 0, zIndex: 100,
-        background: "rgba(3,3,4,0.85)", backdropFilter: "blur(20px)",
+        background: "rgba(3,3,4,0.75)", backdropFilter: "blur(24px)",
         borderBottom: "1px solid rgba(255,255,255,0.05)",
         height: 68, display: "flex", alignItems: "center", padding: "0 24px"
       }}>
