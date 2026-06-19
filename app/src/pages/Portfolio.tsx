@@ -50,7 +50,7 @@ const CSS = `
     100% { transform: translate(0,-112vh); opacity: 0; }
   }
 
-  .ambient-bg { position: fixed; inset: 0; z-index: -1; overflow: hidden; pointer-events: none; }
+  .ambient-bg { position: fixed; inset: 0; z-index: -1; overflow: hidden; pointer-events: none; background: #030304; }
   .ambient-orb { position: absolute; border-radius: 50%; filter: blur(110px); will-change: transform; }
   .ambient-orb-1 { animation: orbDrift1 26s ease-in-out infinite; }
   .ambient-orb-2 { animation: orbDrift2 32s ease-in-out infinite; }
