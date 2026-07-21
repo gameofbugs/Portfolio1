@@ -48,7 +48,7 @@ export default function SingleImageField({ gameId, value, onChange, onError }) {
             disabled={uploading}
             style={{ fontSize: 12, padding: "8px 16px" }}
           >
-            {uploading ? <><span className="spinner" style={{ width: 11, height: 11 }} /> Uploading...</> : "⬆ Upload Cover"}
+            {uploading ? <><span className="spinner" style={{ width: 11, height: 11 }} /> Uploading\u2026</> : "⬆ Upload Cover"}
           </button>
           <input
             ref={fileInputRef}

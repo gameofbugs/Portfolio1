@@ -8,7 +8,9 @@ const PARTICLE_COUNT = 32;
 // z-index so it always sits behind real content and never intercepts
 // clicks (pointer-events: none throughout).
 function AnimatedBackground() {
+  const prefersReduced = typeof window !== "undefined" && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
   const particles = useMemo(() => {
+    if (prefersReduced) return [];
     return Array.from({ length: PARTICLE_COUNT }, (_, i) => {
       const isYellow = Math.random() > 0.55;
       return {
@@ -21,7 +23,7 @@ function AnimatedBackground() {
         color: isYellow ? "#FFD600" : "#F7931A",
       };
     });
-  }, []);
+  }, [prefersReduced]);
 
   return (
     <div className="ambient-bg" aria-hidden="true">

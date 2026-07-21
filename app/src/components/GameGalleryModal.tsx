@@ -24,7 +24,13 @@ export default function GameGalleryModal({ open, onClose, title, videoUrl, image
       if (e.key === "ArrowLeft") setIndex((i) => Math.max(i - 1, 0));
     };
     window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
+    document.body.style.overflow = "hidden";
+    document.body.style.touchAction = "none";
+    return () => {
+      window.removeEventListener("keydown", onKey);
+      document.body.style.overflow = "";
+      document.body.style.touchAction = "";
+    };
   }, [open, slides.length, onClose]);
 
   if (!open || slides.length === 0) return null;
@@ -34,9 +40,13 @@ export default function GameGalleryModal({ open, onClose, title, videoUrl, image
   return (
     <div
       onClick={onClose}
+      role="dialog"
+      aria-modal="true"
+      aria-label={title}
       style={{
         position: "fixed", inset: 0, background: "rgba(3,3,4,0.92)", backdropFilter: "blur(6px)",
         zIndex: 1000, display: "flex", alignItems: "center", justifyContent: "center", padding: 20,
+        overscrollBehavior: "contain",
       }}
     >
       <div onClick={(e) => e.stopPropagation()} style={{ width: "100%", maxWidth: 880, position: "relative" }}>
@@ -80,7 +90,7 @@ export default function GameGalleryModal({ open, onClose, title, videoUrl, image
               </div>
             )
           ) : (
-            <img src={slide.url} alt={title} style={{ width: "100%", maxHeight: "70vh", objectFit: "contain", display: "block", margin: "0 auto" }} />
+            <img src={slide.url} alt={title} width="880" height="495" style={{ width: "100%", maxHeight: "70vh", objectFit: "contain", display: "block", margin: "0 auto" }} />
           )}
 
           {slides.length > 1 && (

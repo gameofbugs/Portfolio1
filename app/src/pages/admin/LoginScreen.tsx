@@ -88,7 +88,7 @@ export default function LoginScreen({ onLogin }) {
           </div>
 
           <button className="btn-primary" style={{ width: "100%", padding: "14px", fontSize: 14, marginTop: 4, justifyContent: "center" }} onClick={attempt} disabled={loading}>
-            {loading ? <><span className="spinner" /> Verifying...</> : "Access Admin Panel"}
+            {loading ? <><span className="spinner" /> Verifying\u2026</> : "Access Admin Panel"}
           </button>
         </div>
       </div>

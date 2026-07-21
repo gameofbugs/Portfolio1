@@ -86,7 +86,7 @@ export default function ImageUploader({ gameId, images = [], onChange, onError }
           disabled={uploading}
           style={{ fontSize: 12, padding: "8px 16px" }}
         >
-          {uploading ? <><span className="spinner" style={{ width: 11, height: 11 }} /> Uploading...</> : "⬆ Upload Image(s)"}
+          {uploading ? <><span className="spinner" style={{ width: 11, height: 11 }} /> Uploading\u2026</> : "⬆ Upload Image(s)"}
         </button>
         <input
           ref={fileInputRef}

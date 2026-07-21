@@ -27,9 +27,11 @@ export default function GameDetailModal({ open, onClose, game }) {
     };
     window.addEventListener("keydown", onKey);
     document.body.style.overflow = "hidden";
+    document.body.style.touchAction = "none";
     return () => {
       window.removeEventListener("keydown", onKey);
       document.body.style.overflow = "";
+      document.body.style.touchAction = "";
     };
   }, [open, slides.length, onClose]);
 
@@ -40,9 +42,13 @@ export default function GameDetailModal({ open, onClose, game }) {
   return (
     <div
       onClick={onClose}
+      role="dialog"
+      aria-modal="true"
+      aria-label={game.title}
       style={{
         position: "fixed", inset: 0, background: "rgba(3,3,4,0.92)", backdropFilter: "blur(6px)",
         zIndex: 1000, display: "flex", alignItems: "center", justifyContent: "center", padding: 16,
+        overscrollBehavior: "contain",
       }}
     >
       <div
@@ -79,7 +85,7 @@ export default function GameDetailModal({ open, onClose, game }) {
                 </div>
               )
             ) : (
-              <img src={slide.url} alt={game.title} style={{ width: "100%", maxHeight: "46vh", objectFit: "contain", display: "block", margin: "0 auto" }} />
+              <img src={slide.url} alt={game.title} width="760" height="428" style={{ width: "100%", maxHeight: "46vh", objectFit: "contain", display: "block", margin: "0 auto" }} />
             )}
 
             {slides.length > 1 && (

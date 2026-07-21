@@ -31,7 +31,7 @@ export default function AdminPanel({ user, onLogout }) {
       if (t) setTools(t);
       if (s) setSocialLinks(s);
     } catch (e) {
-      showToast("error", "// failed to load data");
+      showToast("error", "// failed to load data\u201d);
     } finally {
       setLoading(false);
     }
@@ -211,7 +211,7 @@ export default function AdminPanel({ user, onLogout }) {
     <div style={{ minHeight: "100vh", background: "#030304" }}>
       {/* Toasts */}
       {toast && (
-        <div className={toast.type === "success" ? "save-toast fade-in" : "error-toast fade-in"}>
+        <div className={toast.type === "success" ? "save-toast fade-in" : "error-toast fade-in"} role="status" aria-live="polite">
           {toast.msg}
         </div>
       )}
@@ -225,7 +225,7 @@ export default function AdminPanel({ user, onLogout }) {
           </div>
           <span style={{ fontFamily: "JetBrains Mono", fontSize: 13, letterSpacing: "0.12em", color: "#F7931A" }}>ADMIN PANEL</span>
           <span style={{ fontFamily: "JetBrains Mono", fontSize: 11, color: "rgba(255,255,255,0.2)", letterSpacing: "0.06em" }}>// {user?.email}</span>
-          {saving && <span style={{ fontFamily: "JetBrains Mono", fontSize: 11, color: "rgba(247,147,26,0.6)", letterSpacing: "0.06em", display: "flex", alignItems: "center", gap: 6 }}><span className="spinner" style={{ width: 10, height: 10 }} /> saving...</span>}
+          {saving && <span style={{ fontFamily: "JetBrains Mono", fontSize: 11, color: "rgba(247,147,26,0.6)", letterSpacing: "0.06em", display: "flex", alignItems: "center", gap: 6 }}><span className="spinner" style={{ width: 10, height: 10 }} /> saving\u2026</span>}
         </div>
         <div style={{ display: "flex", gap: 10, alignItems: "center" }}>
           <span style={{ fontFamily: "JetBrains Mono", fontSize: 10, color: "rgba(74,222,128,0.6)", letterSpacing: "0.08em" }}>● LIVE DB</span>

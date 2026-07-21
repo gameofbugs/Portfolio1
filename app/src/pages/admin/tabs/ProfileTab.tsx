@@ -44,7 +44,7 @@ export default function ProfileTab({ profile, setProfile, saveProfile, saving })
       </div>
 
       <button className="btn-primary" onClick={saveProfile} disabled={saving}>
-        {saving ? <><span className="spinner" /> Saving...</> : "Save Profile →"}
+        {saving ? <><span className="spinner" /> Saving\u2026</> : "Save Profile →"}
       </button>
     </div>
   );
