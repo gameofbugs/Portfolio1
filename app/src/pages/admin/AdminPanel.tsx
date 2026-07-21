@@ -31,7 +31,7 @@ export default function AdminPanel({ user, onLogout }) {
       if (t) setTools(t);
       if (s) setSocialLinks(s);
     } catch (e) {
-      showToast("error", "// failed to load data\u201d);
+      showToast("error", "// failed to load data");
     } finally {
       setLoading(false);
     }
