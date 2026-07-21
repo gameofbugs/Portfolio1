@@ -27,7 +27,12 @@ export default function LoginScreen({ onLogin }) {
       });
 
       if (error || !data.session) {
-        setErr("// incorrect email or password");
+        const msg = error?.message?.includes("Email not confirmed")
+          ? "// email not confirmed — check your inbox"
+          : error?.message?.includes("Invalid login credentials")
+          ? "// incorrect email or password"
+          : error?.message || "// authentication failed";
+        setErr(msg);
         setShaking(true);
         setTimeout(() => setShaking(false), 500);
         setPassword("");
@@ -61,6 +66,7 @@ export default function LoginScreen({ onLogin }) {
               <input
                 className="field-input"
                 type="email"
+                autoComplete="email"
                 placeholder="you@example.com"
                 value={email}
                 onChange={e => { setEmail(e.target.value); setErr(""); }}
@@ -74,6 +80,7 @@ export default function LoginScreen({ onLogin }) {
               <input
                 className="field-input"
                 type="password"
+                autoComplete="current-password"
                 placeholder="••••••••••"
                 value={password}
                 onChange={e => { setPassword(e.target.value); setErr(""); }}
