@@ -5,7 +5,6 @@ import AnimatedBackground from "../components/AnimatedBackground";
 import GameDetailModal from "../components/GameDetailModal";
 import OrangeLoader from "../components/OrangeLoader";
 import Typewriter from "../components/Typewriter";
-import UniverseCard from "../components/UniverseCard";
 import FlipCard from "../components/FlipCard";
 import GlassStackCards from "../components/GlassStackCards";
 import ResumeButton from "../components/ResumeButton";
@@ -413,15 +412,37 @@ export default function Portfolio() {
         <div style={{ position: "absolute", top: "10%", right: "12%", width: 480, height: 480, background: "#F7931A", opacity: 0.055, borderRadius: "50%", filter: "blur(130px)", pointerEvents: "none" }} />
 
         <div className="container hero-grid" style={{ position: "relative", zIndex: 1 }}>
-          {/* Universe Card */}
+          {/* Profile Flip Card */}
           <div className="fade-in" style={{ animationDelay: "0.3s" }}>
-            <UniverseCard
-              avatar={data.avatar}
-              name={data.name}
-              role={data.title}
-              availability={data.availability}
-              years={data.yearsActive}
-              projectCount={data.gamesPublished}
+            <FlipCard
+              front={
+                <div style={{ textAlign: "center", padding: 20 }}>
+                  <div style={{
+                    width: 72, height: 72, borderRadius: "50%",
+                    background: "linear-gradient(135deg,#EA580C,#F7931A)",
+                    display: "flex", alignItems: "center", justifyContent: "center",
+                    fontSize: 28, fontWeight: 700, margin: "0 auto 16px",
+                    boxShadow: "0 0 32px -6px rgba(247,147,26,0.5)"
+                  }}>
+                    {data.avatar}
+                  </div>
+                  <h3 style={{ fontSize: 20, fontWeight: 700, marginBottom: 4 }}>{data.name}</h3>
+                  <p style={{ fontFamily: "JetBrains Mono", fontSize: 12, color: "#F7931A", letterSpacing: "0.05em" }}>{data.title}</p>
+                  <div style={{ display: "flex", gap: 8, justifyContent: "center", marginTop: 12, flexWrap: "wrap" }}>
+                    <span className="badge badge-gr">{data.availability}</span>
+                    <span className="badge badge-o">{data.yearsActive}+ yrs</span>
+                    <span className="badge badge-g">{data.gamesPublished} projects</span>
+                  </div>
+                </div>
+              }
+              back={
+                <div style={{ textAlign: "center", padding: 20 }}>
+                  <p style={{ color: "rgba(255,255,255,0.9)", fontSize: 13, lineHeight: 1.6, marginBottom: 16 }}>{data.aim}</p>
+                  <div style={{ display: "flex", gap: 8, justifyContent: "center" }}>
+                    <ResumeButton onClick={() => setShowResume(true)} />
+                  </div>
+                </div>
+              }
             />
           </div>
 
