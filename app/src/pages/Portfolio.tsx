@@ -5,6 +5,9 @@ import AnimatedBackground from "../components/AnimatedBackground";
 import GameDetailModal from "../components/GameDetailModal";
 import OrangeLoader from "../components/OrangeLoader";
 import Typewriter from "../components/Typewriter";
+import UniverseCard from "../components/UniverseCard";
+import FlipCard from "../components/FlipCard";
+import GlassStackCards from "../components/GlassStackCards";
 import ResumeButton from "../components/ResumeButton";
 import SocialCircleMenu from "../components/SocialCircleMenu";
 import BottomNav from "../components/BottomNav";
@@ -57,6 +60,7 @@ const CSS = `
     0% { transform: translateX(0); }
     100% { transform: translateX(-50%); }
   }
+  @keyframes blink { 50% { opacity: 0; } }
 
   .ambient-bg { position: fixed; inset: 0; z-index: -1; overflow: hidden; pointer-events: none; background: #030304; }
   .ambient-orb { position: absolute; border-radius: 50%; filter: blur(110px); will-change: transform; }
@@ -66,7 +70,7 @@ const CSS = `
   .ambient-particle { position: absolute; bottom: -20px; border-radius: 50%; animation-name: particleRise; animation-timing-function: linear; animation-iteration-count: infinite; will-change: transform, opacity; }
 
   @media (prefers-reduced-motion: reduce) {
-    .ambient-orb, .ambient-particle, .float, .float-delay, .spin-slow, .spin-slow-r, .ping, .fade-in, .skeleton { animation: none !important; }
+    .ambient-orb, .ambient-particle, .float, .float-delay, .spin-slow, .spin-slow-r, .ping, .fade-in, .skeleton, .slide-up { animation: none !important; }
     html { scroll-behavior: auto; }
   }
 
@@ -110,13 +114,13 @@ const CSS = `
   .game-card-cover .video-pill { position: absolute; bottom: 10px; right: 10px; background: rgba(0,0,0,0.55); border: 1px solid rgba(255,255,255,0.18); color: #F7931A; font-size: 12px; width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center; }
   .game-card-body { padding: 22px 22px 24px; display: flex; flex-direction: column; flex: 1; }
 
-  [id] { scroll-margin-top: 84px; }
+    [id] { scroll-margin-top: 104px; }
 
   .skeleton { background: linear-gradient(90deg, #0F1115 25%, #1a1d24 50%, #0F1115 75%); background-size: 200% 100%; animation: shimmer 1.5s infinite; border-radius: 8px; }
   .live-dot { display: inline-flex; align-items: center; gap: 6px; font-family: 'JetBrains Mono', monospace; font-size: 10px; color: #4ade80; letter-spacing: 0.1em; text-transform: uppercase; }
 
-  .container { width: 100%; max-width: 1280px; margin: 0 auto; padding: 0 24px; }
-  .hero-grid { display: grid; grid-template-columns: 1fr 300px; gap: 48px; align-items: center; }
+  .container { width: 100%; max-width: 1320px; margin: 0 auto; padding: 0 48px; }
+  .hero-grid { display: grid; grid-template-columns: 420px 1fr 300px; gap: 48px; align-items: center; }
   .orb-wrap { width: 280px; height: 280px; position: relative; display: flex; align-items: center; justify-content: center; }
   .about-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 72px; align-items: center; }
   .stats-grid { display: grid; grid-template-columns: repeat(3,1fr); }
@@ -126,6 +130,24 @@ const CSS = `
   .nav-links { display: flex; align-items: center; gap: 32px; }
 
   .section-pad { scroll-margin-top: 84px; }
+
+  .terminal-card {
+    background: #0A0C10; border: 1px solid rgba(247,147,26,0.2);
+    border-radius: 12px; padding: 24px; font-family: 'JetBrains Mono', monospace;
+    position: relative; overflow: hidden;
+  }
+  .terminal-card::before {
+    content: ""; position: absolute; top: 0; left: 0; right: 0;
+    height: 28px; background: rgba(247,147,26,0.08);
+    border-bottom: 1px solid rgba(247,147,26,0.15);
+    border-radius: 12px 12px 0 0;
+  }
+  .terminal-dots {
+    position: absolute; top: 8px; left: 12px; display: flex; gap: 6px;
+  }
+  .terminal-dots span {
+    width: 10px; height: 10px; border-radius: 50%;
+  }
 
   .horiz-scroll { display: flex; gap: 24px; overflow-x: auto; padding: 8px 0 16px; scroll-snap-type: x mandatory; -webkit-overflow-scrolling: touch; }
   .horiz-scroll > * { scroll-snap-align: start; flex-shrink: 0; }
@@ -154,14 +176,21 @@ const CSS = `
   .modal-overlay { position: fixed; inset: 0; z-index: 200; background: rgba(3,3,4,0.85); backdrop-filter: blur(8px); display: flex; align-items: center; justify-content: center; padding: 24px; animation: fadeIn 0.25s ease both; }
   .modal-content { background: #0F1115; border: 1px solid rgba(255,255,255,0.08); border-radius: 20px; max-width: 600px; width: 100%; max-height: 90vh; overflow-y: auto; padding: 32px; position: relative; }
 
+  @media (max-width: 1200px) {
+    .hero-grid { grid-template-columns: 320px 1fr; gap: 32px; }
+    .hero-grid .orb-wrap { display: none; }
+  }
+
   @media (max-width: 900px) {
     .hero-grid { grid-template-columns: 1fr; text-align: center; }
+    .hero-grid .universe-parent { margin: 0 auto; }
     .orb-wrap { width: 220px; height: 220px; justify-self: center; margin-top: 32px; }
     .about-grid { grid-template-columns: 1fr; gap: 40px; }
     .stats-grid { grid-template-columns: repeat(3,1fr); }
   }
 
   @media (max-width: 640px) {
+    .container { padding: 0 20px; }
     .nav-links { gap: 16px; }
     .nav-link { font-size: 10px; }
     .live-dot span:last-child { display: none; }
@@ -293,12 +322,19 @@ export default function Portfolio() {
     const form = e.target;
     const name = form.name.value.trim();
     const email = form.email.value.trim();
+    const subject = form.subject?.value?.trim() || "";
     const message = form.message.value.trim();
     if (!name || !email || !message) { setContactErr("// all fields required"); return; }
     setContactSubmitting(true); setContactErr("");
     try {
-      const { error } = await supabase.from("contact_messages").insert({ name, email, message });
+      const { error } = await supabase.from("contact_messages").insert({ name, email, subject, message });
       if (error) throw error;
+      try {
+        await fetch("https://mcp.supabase.com/functions/v1/send-contact-notification", {
+          method: "POST", headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ name, email, subject, message }),
+        });
+      } catch (_) { /* email notification is optional */ }
       setContactDone(true);
       form.reset();
     } catch (err) {
@@ -345,7 +381,7 @@ export default function Portfolio() {
         position: "fixed", top: 0, left: 0, right: 0, zIndex: 100,
         background: "rgba(3,3,4,0.75)", backdropFilter: "blur(24px)",
         borderBottom: "1px solid rgba(255,255,255,0.05)",
-        height: 68, display: "flex", alignItems: "center", padding: "0 24px"
+        height: 88, display: "flex", alignItems: "center", padding: "0 24px"
       }}>
         <div className="container" style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: 0, maxWidth: "100%", paddingLeft: 24, paddingRight: 24 }}>
           <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
@@ -372,34 +408,36 @@ export default function Portfolio() {
       </nav>
 
       {/* ── HERO ── */}
-      <section id="hero" className="hero-pad" style={{ paddingTop: 140, paddingBottom: 80, paddingLeft: 24, paddingRight: 24, overflow: "hidden" }}>
+      <section id="hero" className="hero-pad" style={{ paddingTop: 140, paddingBottom: 80, paddingLeft: 24, paddingRight: 24, overflow: "hidden", minHeight: "100vh" }}>
         <div className="grid-bg" style={{ position: "absolute", inset: 0, pointerEvents: "none", maskImage: "radial-gradient(ellipse at 40% 50%, black 20%, transparent 75%)", WebkitMaskImage: "radial-gradient(ellipse at 40% 50%, black 20%, transparent 75%)" }} />
         <div style={{ position: "absolute", top: "10%", right: "12%", width: 480, height: 480, background: "#F7931A", opacity: 0.055, borderRadius: "50%", filter: "blur(130px)", pointerEvents: "none" }} />
 
         <div className="container hero-grid" style={{ position: "relative", zIndex: 1 }}>
+          {/* Universe Card */}
+          <div className="fade-in" style={{ animationDelay: "0.3s" }}>
+            <UniverseCard
+              avatar={data.avatar}
+              name={data.name}
+              role={data.title}
+              availability={data.availability}
+              years={data.yearsActive}
+              projectCount={data.gamesPublished}
+            />
+          </div>
+
+          {/* Typewriter + CTA */}
           <div>
-            <div style={{ display: "inline-flex", alignItems: "center", gap: 8, background: "rgba(247,147,26,0.07)", border: "1px solid rgba(247,147,26,0.22)", borderRadius: 9999, padding: "6px 16px", marginBottom: 32 }}>
-              <div style={{ position: "relative", width: 8, height: 8, flexShrink: 0 }}>
-                <div className="ping" style={{ position: "absolute", inset: 0, borderRadius: "50%", background: "#4ade80" }} />
-                <div style={{ position: "absolute", inset: 0, borderRadius: "50%", background: "#4ade80" }} />
-              </div>
-              <span style={{ fontFamily: "JetBrains Mono", fontSize: 11, letterSpacing: "0.14em", color: "#94A3B8", textTransform: "uppercase" }}>{data.availability} for Collaboration</span>
-            </div>
-            <h1 style={{ fontSize: "clamp(36px,5.5vw,72px)", fontWeight: 700, lineHeight: 1.07, marginBottom: 22 }}>
-              {data.name}<br />
-              <span className="grad-text">{data.title}</span>
-            </h1>
             <Typewriter />
-            <p style={{ color: "#94A3B8", fontSize: 17, lineHeight: 1.75, maxWidth: 500, marginBottom: 40, marginTop: 16 }}>
+            <p style={{ color: "#94A3B8", fontSize: 17, lineHeight: 1.75, maxWidth: 500, marginBottom: 40, marginTop: 24 }}>
               {data.yearsActive} years shipping games that players remember.
             </p>
             <div className="hero-buttons" style={{ display: "flex", gap: 14, flexWrap: "wrap" }}>
+              <ResumeButton onClick={() => setShowResume(true)} />
               <button className="btn-primary" onClick={() => scrollTo("projects")}>View Projects <span style={{ fontSize: 16 }}>↓</span></button>
-              <button className="btn-outline" onClick={() => scrollTo("about")}>About Me</button>
             </div>
           </div>
 
-          {/* Orb */}
+          {/* Planet Orb */}
           <div className="float orb-wrap" style={{ justifySelf: "center" }}>
             <div className="spin-slow" style={{ position: "absolute", inset: 0, borderRadius: "50%", border: "1px solid rgba(247,147,26,0.22)" }} />
             <div className="spin-slow-r" style={{ position: "absolute", inset: "22px", borderRadius: "50%", border: "1px dashed rgba(247,147,26,0.12)" }} />
@@ -446,26 +484,37 @@ export default function Portfolio() {
             Hand-picked projects that showcase the best of my work.
           </p>
           {featured.length > 0 ? (
-            <div className="horiz-scroll" style={{ scrollbarWidth: "thin" }}>
+            <div className="horiz-scroll" style={{ scrollbarWidth: "thin", padding: "12px 0" }}>
               {featured.map((g) => (
-                <div key={g.id} className="card game-card fade-in" onClick={() => setDetailGame(g)} style={{ minWidth: 300, maxWidth: 360 }}>
-                  <div className="game-card-cover">
-                    {g.cover_image ? (
-                      <img src={g.cover_image} alt={g.title} loading="lazy" />
-                    ) : (
-                      <span className="cover-emoji">{g.cover}</span>
-                    )}
-                    {g.video_url && <span className="video-pill">▶</span>}
-                  </div>
-                  <div className="game-card-body">
-                    <h3 style={{ fontSize: 17, fontWeight: 600, marginBottom: 8, lineHeight: 1.25 }}>{g.title}</h3>
-                    <div style={{ display: "flex", flexWrap: "wrap", gap: 5, marginBottom: 12 }}>
-                      <span className="badge badge-o">{g.genre}</span>
-                      <span className="badge badge-g">{g.year}</span>
-                    </div>
-                    <p style={{ color: "#94A3B8", fontSize: 13, lineHeight: 1.65, marginBottom: 16, flex: 1 }}>{g.description}</p>
-                    <span style={{ fontFamily: "JetBrains Mono", fontSize: 11, color: "#F7931A", letterSpacing: "0.08em" }}>VIEW DETAILS →</span>
-                  </div>
+                <div key={g.id} style={{ minWidth: 300, maxWidth: 340, cursor: "pointer" }} onClick={() => setDetailGame(g)}>
+                  <FlipCard
+                    front={
+                      <div style={{ textAlign: "center", padding: 16 }}>
+                        {g.cover_image ? (
+                          <img src={g.cover_image} alt={g.title} style={{ width: "100%", height: 140, objectFit: "cover", borderRadius: 8, marginBottom: 12 }} />
+                        ) : (
+                          <span style={{ fontSize: 48, display: "block", marginBottom: 12 }}>{g.cover}</span>
+                        )}
+                        <h3 style={{ fontSize: 18, fontWeight: 700 }}>{g.title}</h3>
+                        <div style={{ display: "flex", gap: 6, justifyContent: "center", marginTop: 8, flexWrap: "wrap" }}>
+                          <span className="badge badge-o">{g.genre}</span>
+                          <span className="badge badge-g">{g.year}</span>
+                          <span className={`badge ${g.status === "Released" ? "badge-gr" : "badge-o"}`}>{g.status}</span>
+                        </div>
+                      </div>
+                    }
+                    back={
+                      <div style={{ textAlign: "center", padding: 16 }}>
+                        <p style={{ color: "rgba(255,255,255,0.9)", fontSize: 13, lineHeight: 1.6, marginBottom: 16 }}>{g.description}</p>
+                        <div style={{ display: "flex", gap: 6, justifyContent: "center", flexWrap: "wrap" }}>
+                          {g.platform && <span className="badge badge-gr" style={{ background: "rgba(255,255,255,0.15)", color: "#fff" }}>{g.platform}</span>}
+                        </div>
+                        <span style={{ fontFamily: "JetBrains Mono", fontSize: 11, color: "#FFD600", letterSpacing: "0.08em", display: "block", marginTop: 16 }}>
+                          VIEW DETAILS →
+                        </span>
+                      </div>
+                    }
+                  />
                 </div>
               ))}
             </div>
@@ -522,22 +571,22 @@ export default function Portfolio() {
             The tools and technologies I use to build games.
           </p>
           {skills.length > 0 ? (
-            <div style={{ display: "flex", flexWrap: "wrap", gap: 12, justifyContent: "center" }}>
-              {skills.map((s, i) => (
-                <div key={s.id} className="skill-chip slide-up" style={{ animationDelay: `${i * 0.07}s` }}>
-                  <span className="skill-logo">{s.logo}</span>
-                  <span style={{ fontFamily: "JetBrains Mono", fontSize: 12, color: "rgba(255,255,255,0.85)", letterSpacing: "0.04em" }}>{s.name}</span>
-                </div>
-              ))}
+            <div style={{ maxWidth: 800, margin: "0 auto" }}>
+              <GlassStackCards
+                items={skills.map(s => ({
+                  icon: <span style={{ fontSize: 32 }}>{s.logo}</span>,
+                  label: s.name,
+                }))}
+              />
             </div>
           ) : (
-            <div style={{ display: "flex", flexWrap: "wrap", gap: 12, justifyContent: "center" }}>
-              {tools.map((t, i) => (
-                <div key={t.id} className="skill-chip slide-up" style={{ animationDelay: `${i * 0.07}s` }}>
-                  <span className="skill-logo">{t.logo}</span>
-                  <span style={{ fontFamily: "JetBrains Mono", fontSize: 12, color: "rgba(255,255,255,0.85)", letterSpacing: "0.04em" }}>{t.name}</span>
-                </div>
-              ))}
+            <div style={{ maxWidth: 800, margin: "0 auto" }}>
+              <GlassStackCards
+                items={tools.map(t => ({
+                  icon: <span style={{ fontSize: 32 }}>{t.logo}</span>,
+                  label: t.name,
+                }))}
+              />
             </div>
           )}
         </div>
@@ -551,8 +600,24 @@ export default function Portfolio() {
             <h2 style={{ fontSize: "clamp(26px,4vw,46px)", fontWeight: 700, marginBottom: 24 }}>
               What <span className="grad-text">Drives Me</span>
             </h2>
-            <p style={{ color: "#CBD5E1", fontSize: 16, lineHeight: 1.9 }}>{data.aim}</p>
-            <div style={{ marginTop: 32 }}>
+            {/* Terminal-style story */}
+            <div className="terminal-card slide-up">
+              <div className="terminal-dots">
+                <span style={{ background: "#f87171" }} />
+                <span style={{ background: "#FBBF24" }} />
+                <span style={{ background: "#4ade80" }} />
+              </div>
+              <div style={{ marginTop: 16, paddingTop: 8 }}>
+                <p style={{ color: "#4ade80", fontSize: 13, marginBottom: 8 }}>$ <span style={{ color: "#F7931A" }}>cat</span> about_developer.txt</p>
+                <p style={{ color: "#CBD5E1", fontSize: 14, lineHeight: 1.9, fontFamily: "'JetBrains Mono', monospace" }}>
+                  {data.aim}
+                </p>
+                <p style={{ color: "#94A3B8", fontSize: 12, marginTop: 12, fontFamily: "'JetBrains Mono', monospace" }}>
+                  <span style={{ color: "#4ade80" }}>$</span> <span style={{ color: "#F7931A" }}>echo</span> "Ready to build the next great game."<span style={{ animation: "blink 1s step-end infinite" }}>▌</span>
+                </p>
+              </div>
+            </div>
+            <div style={{ marginTop: 24 }}>
               <ResumeButton onClick={() => setShowResume(true)} />
             </div>
           </div>
@@ -560,9 +625,9 @@ export default function Portfolio() {
             {[
               { icon: "⚡", title: "Performance First", body: "Every millisecond matters. Clean code, fast builds, smooth 60fps gameplay." },
               { icon: "🧩", title: "Systems Thinking", body: "Games are systems. I design each mechanic to create emergent, interesting interactions." },
-              { icon: "🔬", title: "Iterate Ruthlessly", body: "Ship, gather feedback, cut what doesn't work. The best games are forged in revision." },
+              { icon: "🔬", title: "Always Learning", body: "Ship, gather feedback, cut what doesn't work. The best games are forged in revision." },
             ].map((item, i) => (
-              <div key={i} className="glass" style={{ padding: "20px 24px", display: "flex", gap: 16, alignItems: "flex-start" }}>
+              <div key={i} className="glass slide-up" style={{ padding: "20px 24px", display: "flex", gap: 16, alignItems: "flex-start", animationDelay: `${i * 0.1}s` }}>
                 <div style={{ width: 46, height: 46, borderRadius: 11, background: "rgba(247,147,26,0.09)", border: "1px solid rgba(247,147,26,0.2)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 20, flexShrink: 0 }}>{item.icon}</div>
                 <div>
                   <h4 style={{ fontWeight: 600, fontSize: 15, marginBottom: 5 }}>{item.title}</h4>
@@ -626,6 +691,7 @@ export default function Portfolio() {
               <form className="contact-form" onSubmit={submitContact}>
                 <input type="text" name="name" placeholder="Your Name" autoComplete="name" />
                 <input type="email" name="email" placeholder="Your Email" autoComplete="email" />
+                <input type="text" name="subject" placeholder="Subject" />
                 <textarea name="message" placeholder="Your Message" />
                 {contactErr && <p style={{ fontFamily: "JetBrains Mono", fontSize: 11, color: "#f87171" }}>{contactErr}</p>}
                 {contactDone ? (

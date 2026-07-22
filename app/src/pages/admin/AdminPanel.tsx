@@ -8,6 +8,7 @@ import SocialTab from "./tabs/SocialTab";
 import SkillsTab from "./tabs/SkillsTab";
 import ReviewsTab from "./tabs/ReviewsTab";
 import SettingsTab from "./tabs/SettingsTab";
+import MessagesTab from "./tabs/MessagesTab";
 
 export default function AdminPanel({ user, onLogout }) {
   const [profile, setProfile] = useState(null);
@@ -16,6 +17,7 @@ export default function AdminPanel({ user, onLogout }) {
   const [socialLinks, setSocialLinks] = useState([]);
   const [skills, setSkills] = useState([]);
   const [reviews, setReviews] = useState([]);
+  const [messages, setMessages] = useState([]);
   const [settings, setSettings] = useState(null);
   const [tab, setTab] = useState("profile");
   const [toast, setToast] = useState(null);
@@ -33,6 +35,7 @@ export default function AdminPanel({ user, onLogout }) {
         supabase.from("social_links").select("*").order("sort_order", { ascending: true }),
         supabase.from("skills").select("*").order("sort_order", { ascending: true }),
         supabase.from("reviews").select("*").order("sort_order", { ascending: true }),
+        supabase.from("contact_messages").select("*").order("created_at", { ascending: false }),
         supabase.from("settings").select("*").eq("id", 1).single(),
       ]);
       const ok = (r) => r?.status === "fulfilled" && r?.value?.data;
@@ -42,7 +45,8 @@ export default function AdminPanel({ user, onLogout }) {
       if (ok(results[3])) setSocialLinks(results[3].value.data);
       if (ok(results[4])) setSkills(results[4].value.data);
       if (ok(results[5])) setReviews(results[5].value.data);
-      if (ok(results[6])) setSettings(results[6].value.data);
+      if (ok(results[6])) setMessages(results[6].value.data);
+      if (ok(results[7])) setSettings(results[7].value.data);
     } catch (e) {
       showToast("error", "// failed to load data");
     } finally {
@@ -287,6 +291,25 @@ export default function AdminPanel({ user, onLogout }) {
     setReviews(prev => prev.map(r => r.id === id ? { ...r, [field]: val } : r));
   };
 
+  // ── Messages ──
+  const markMessageRead = async (id) => {
+    const { error } = await supabase.from("contact_messages").update({ read: true }).eq("id", id);
+    if (error) showToast("error", "// failed to update message");
+    else {
+      setMessages(prev => prev.map(m => m.id === id ? { ...m, read: true } : m));
+      showToast("success", "✓ Message marked as read");
+    }
+  };
+
+  const removeMessage = async (id) => {
+    const { error } = await supabase.from("contact_messages").delete().eq("id", id);
+    if (error) showToast("error", "// failed to delete message");
+    else {
+      setMessages(prev => prev.filter(m => m.id !== id));
+      showToast("success", "✓ Message deleted");
+    }
+  };
+
   // ── Settings ──
   const saveSettings = async () => {
     setSaving(true);
@@ -335,49 +358,55 @@ export default function AdminPanel({ user, onLogout }) {
 
       <div style={{ maxWidth: 1020, margin: "0 auto", padding: "32px 20px 60px" }}>
         {/* Tabs */}
-        <div style={{ display: "flex", gap: 8, marginBottom: 32, flexWrap: "wrap" }}>
-          {["profile", "games", "tools", "skills", "reviews", "social", "settings"].map(t => (
-            <button key={t} className={`tab-btn ${tab === t ? "active" : "inactive"}`} onClick={() => setTab(t)}>
-              {t === "profile" ? "👤 Profile" : t === "games" ? `🎮 Games (${games.length})` : t === "tools" ? `🔧 Tools (${tools.length})` : t === "skills" ? `⚡ Skills (${skills.length})` : t === "reviews" ? `💬 Reviews (${reviews.length})` : t === "social" ? `🔗 Contact (${socialLinks.length})` : "⚙ Settings"}
+        <div style={{ display: "flex", gap: 8, marginBottom: 32, flexWrap: "wrap", borderBottom: "1px solid rgba(255,255,255,0.06)", paddingBottom: 12 }}>
+          {["profile", "games", "tools", "skills", "reviews", "messages", "social", "settings"].map(t => (
+            <button key={t} className={`tab-btn tab-${t} ${tab === t ? "active" : "inactive"}`} onClick={() => setTab(t)}>
+              {t === "profile" ? "👤 Profile" : t === "games" ? `🎮 Games (${games.length})` : t === "tools" ? `🔧 Tools (${tools.length})` : t === "skills" ? `⚡ Skills (${skills.length})` : t === "reviews" ? `💬 Reviews (${reviews.length})` : t === "messages" ? `✉ Messages (${messages.filter(m => !m.read).length})` : t === "social" ? `🔗 Contact (${socialLinks.length})` : "⚙ Settings"}
             </button>
           ))}
         </div>
 
-        {tab === "profile" && (
-          <ProfileTab profile={profile} setProfile={setProfile} saveProfile={saveProfile} saving={saving} />
-        )}
+        <div className="tab-content">
+          {tab === "profile" && (
+            <ProfileTab profile={profile} setProfile={setProfile} saveProfile={saveProfile} saving={saving} />
+          )}
 
-        {tab === "games" && (
-          <GamesTab
-            games={games}
-            addGame={addGame}
-            saveGame={saveGame}
-            removeGame={removeGame}
-            updateGameField={updateGameField}
-            saving={saving}
-            onUploadError={(msg) => showToast("error", "// " + msg)}
-          />
-        )}
+          {tab === "games" && (
+            <GamesTab
+              games={games}
+              addGame={addGame}
+              saveGame={saveGame}
+              removeGame={removeGame}
+              updateGameField={updateGameField}
+              saving={saving}
+              onUploadError={(msg) => showToast("error", "// " + msg)}
+            />
+          )}
 
-        {tab === "tools" && (
-          <ToolsTab tools={tools} addTool={addTool} saveTool={saveTool} removeTool={removeTool} updateToolField={updateToolField} saving={saving} />
-        )}
+          {tab === "tools" && (
+            <ToolsTab tools={tools} addTool={addTool} saveTool={saveTool} removeTool={removeTool} updateToolField={updateToolField} saving={saving} />
+          )}
 
-        {tab === "social" && (
-          <SocialTab socialLinks={socialLinks} addSocial={addSocial} saveSocial={saveSocial} removeSocial={removeSocial} updateSocialField={updateSocialField} saving={saving} />
-        )}
+          {tab === "social" && (
+            <SocialTab socialLinks={socialLinks} addSocial={addSocial} saveSocial={saveSocial} removeSocial={removeSocial} updateSocialField={updateSocialField} saving={saving} />
+          )}
 
-        {tab === "skills" && (
-          <SkillsTab skills={skills} addSkill={addSkill} saveSkill={saveSkill} removeSkill={removeSkill} updateSkillField={updateSkillField} saving={saving} />
-        )}
+          {tab === "skills" && (
+            <SkillsTab skills={skills} addSkill={addSkill} saveSkill={saveSkill} removeSkill={removeSkill} updateSkillField={updateSkillField} saving={saving} />
+          )}
 
-        {tab === "reviews" && (
-          <ReviewsTab reviews={reviews} addReview={addReview} saveReview={saveReview} removeReview={removeReview} updateReviewField={updateReviewField} saving={saving} />
-        )}
+          {tab === "reviews" && (
+            <ReviewsTab reviews={reviews} addReview={addReview} saveReview={saveReview} removeReview={removeReview} updateReviewField={updateReviewField} saving={saving} />
+          )}
 
-        {tab === "settings" && (
-          <SettingsTab settings={settings} setSettings={setSettings} saveSettings={saveSettings} saving={saving} />
-        )}
+          {tab === "messages" && (
+            <MessagesTab messages={messages} markRead={markMessageRead} removeMessage={removeMessage} saving={saving} />
+          )}
+
+          {tab === "settings" && (
+            <SettingsTab settings={settings} setSettings={setSettings} saveSettings={saveSettings} saving={saving} />
+          )}
+        </div>
       </div>
     </div>
   );

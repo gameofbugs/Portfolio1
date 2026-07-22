@@ -37,10 +37,19 @@ const CSS = `
   .field-input:disabled { opacity: 0.4; cursor: not-allowed; }
   textarea.field-input { resize: vertical; min-height: 80px; line-height: 1.6; }
   select.field-input { appearance: none; cursor: pointer; }
-  .tab-btn { font-family: 'JetBrains Mono', monospace; font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase; padding: 9px 18px; border-radius: 10px; cursor: pointer; border: 1px solid transparent; transition: border-color 0.2s ease, color 0.2s ease, background 0.2s ease; touch-action: manipulation; }
+  .tab-btn { font-family: 'JetBrains Mono', monospace; font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase; padding: 9px 18px; border-radius: 10px; cursor: pointer; border: 1px solid transparent; transition: border-color 0.2s ease, color 0.2s ease, background 0.2s ease, box-shadow 0.2s ease; touch-action: manipulation; }
   .tab-btn.active { background: rgba(247,147,26,0.12); color: #F7931A; border-color: rgba(247,147,26,0.28); }
   .tab-btn.inactive { background: transparent; color: rgba(255,255,255,0.35); }
   .tab-btn.inactive:hover { color: rgba(255,255,255,0.65); background: rgba(255,255,255,0.04); }
+  .tab-btn.tab-messages.active { background: rgba(99,102,241,0.12); color: #818cf8; border-color: rgba(99,102,241,0.28); }
+  .tab-btn.tab-games.active { background: rgba(74,222,128,0.12); color: #4ade80; border-color: rgba(74,222,128,0.28); }
+  .tab-btn.tab-reviews.active { background: rgba(251,191,36,0.12); color: #FBBF24; border-color: rgba(251,191,36,0.28); }
+  .tab-btn.tab-social.active { background: rgba(167,139,250,0.12); color: #a78bfa; border-color: rgba(167,139,250,0.28); }
+  .tab-btn.tab-tools.active { background: rgba(56,189,248,0.12); color: #38bdf8; border-color: rgba(56,189,248,0.28); }
+  .tab-btn.tab-skills.active { background: rgba(248,113,113,0.12); color: #f87171; border-color: rgba(248,113,113,0.28); }
+  .tab-btn.tab-settings.active { background: rgba(148,163,184,0.12); color: #94A3B8; border-color: rgba(148,163,184,0.28); }
+  .tab-btn.profile.active { background: rgba(247,147,26,0.12); color: #F7931A; border-color: rgba(247,147,26,0.28); }
+  .tab-content { min-height: 300px; }
   .section-label { font-family: 'JetBrains Mono', monospace; font-size: 11px; letter-spacing: 0.18em; text-transform: uppercase; color: #F7931A; }
   .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
   .save-toast { position: fixed; bottom: 28px; right: 28px; background: rgba(74,222,128,0.12); border: 1px solid rgba(74,222,128,0.3); color: #4ade80; font-family: 'JetBrains Mono', monospace; font-size: 13px; letter-spacing: 0.06em; padding: 13px 22px; border-radius: 12px; backdrop-filter: blur(12px); z-index: 200; display: flex; align-items: center; gap: 8px; max-width: calc(100vw - 32px); }
