@@ -26,22 +26,23 @@ export default function AdminPanel({ user, onLogout }) {
   const loadAll = async () => {
     setLoading(true);
     try {
-      const [{ data: p }, { data: g }, { data: t }, { data: s }, { data: sk }, { data: rv }, { data: st }] = await Promise.all([
+      const results = await Promise.allSettled([
         supabase.from("profile").select("*").eq("id", 1).single(),
         supabase.from("games").select("*").order("year", { ascending: false }),
         supabase.from("tools").select("*").order("id", { ascending: true }),
         supabase.from("social_links").select("*").order("sort_order", { ascending: true }),
         supabase.from("skills").select("*").order("sort_order", { ascending: true }),
         supabase.from("reviews").select("*").order("sort_order", { ascending: true }),
-        supabase.from("settings").select("*").eq("id", 1).single().catch(() => ({ data: null })),
+        supabase.from("settings").select("*").eq("id", 1).single(),
       ]);
-      if (p) setProfile(p);
-      if (g) setGames(g);
-      if (t) setTools(t);
-      if (s) setSocialLinks(s);
-      if (sk) setSkills(sk);
-      if (rv) setReviews(rv);
-      if (st) setSettings(st);
+      const ok = (r) => r?.status === "fulfilled" && r?.value?.data;
+      if (ok(results[0])) setProfile(results[0].value.data);
+      if (ok(results[1])) setGames(results[1].value.data);
+      if (ok(results[2])) setTools(results[2].value.data);
+      if (ok(results[3])) setSocialLinks(results[3].value.data);
+      if (ok(results[4])) setSkills(results[4].value.data);
+      if (ok(results[5])) setReviews(results[5].value.data);
+      if (ok(results[6])) setSettings(results[6].value.data);
     } catch (e) {
       showToast("error", "// failed to load data");
     } finally {

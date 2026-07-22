@@ -5,7 +5,6 @@ import AnimatedBackground from "../components/AnimatedBackground";
 import GameDetailModal from "../components/GameDetailModal";
 import OrangeLoader from "../components/OrangeLoader";
 import Typewriter from "../components/Typewriter";
-import UniverseCard from "../components/UniverseCard";
 import ResumeButton from "../components/ResumeButton";
 import SocialCircleMenu from "../components/SocialCircleMenu";
 import BottomNav from "../components/BottomNav";
@@ -25,8 +24,9 @@ const DEFAULT_DATA = {
 
 const CSS = `
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-  html { scroll-behavior: smooth; }
+  html { scroll-behavior: smooth; cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='28' viewBox='0 0 24 28'%3E%3Cpath fill='%23F7931A' d='M2 2 L20 14 L12 16 L14 24 L10 24 L8 16 L2 2 Z'/%3E%3C/svg%3E"), auto; }
   body { background: #030304; color: #fff; font-family: 'Space Grotesk', sans-serif; overflow-x: hidden; }
+  a, button, input, textarea, select { cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='28' viewBox='0 0 24 28'%3E%3Cpath fill='%23FFD600' d='M2 2 L20 14 L12 16 L14 24 L10 24 L8 16 L2 2 Z'/%3E%3C/svg%3E"), pointer; }
   ::-webkit-scrollbar { width: 4px; }
   ::-webkit-scrollbar-track { background: #0F1115; }
   ::-webkit-scrollbar-thumb { background: #F7931A55; border-radius: 2px; }
@@ -116,7 +116,8 @@ const CSS = `
   .live-dot { display: inline-flex; align-items: center; gap: 6px; font-family: 'JetBrains Mono', monospace; font-size: 10px; color: #4ade80; letter-spacing: 0.1em; text-transform: uppercase; }
 
   .container { width: 100%; max-width: 1280px; margin: 0 auto; padding: 0 24px; }
-  .hero-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 48px; align-items: center; }
+  .hero-grid { display: grid; grid-template-columns: 1fr 300px; gap: 48px; align-items: center; }
+  .orb-wrap { width: 280px; height: 280px; position: relative; display: flex; align-items: center; justify-content: center; }
   .about-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 72px; align-items: center; }
   .stats-grid { display: grid; grid-template-columns: repeat(3,1fr); }
   .games-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(270px,1fr)); gap: 24px; align-items: start; }
@@ -155,6 +156,7 @@ const CSS = `
 
   @media (max-width: 900px) {
     .hero-grid { grid-template-columns: 1fr; text-align: center; }
+    .orb-wrap { width: 220px; height: 220px; justify-self: center; margin-top: 32px; }
     .about-grid { grid-template-columns: 1fr; gap: 40px; }
     .stats-grid { grid-template-columns: repeat(3,1fr); }
   }
@@ -170,6 +172,7 @@ const CSS = `
     .tools-grid { grid-template-columns: 1fr; }
     .section-pad { padding: 60px 20px; }
     .hero-pad { padding-top: 110px; padding-bottom: 60px; padding-left: 20px; padding-right: 20px; }
+    .orb-wrap { width: 180px; height: 180px; }
   }
 
   @media (max-width: 400px) {
@@ -201,54 +204,43 @@ export default function Portfolio() {
 
   const loadData = useCallback(async () => {
     try {
-      const [
-        { data: profile, error: profileErr },
-        { data: gamesData, error: gamesErr },
-        { data: toolsData, error: toolsErr },
-        { data: socialData, error: socialErr },
-        settingsResult,
-      ] = await Promise.all([
+      const results = await Promise.allSettled([
         supabase.from("profile").select("*").eq("id", 1).single(),
         supabase.from("games").select("*").order("year", { ascending: false }),
         supabase.from("tools").select("*").order("id", { ascending: true }),
         supabase.from("social_links").select("*").order("sort_order", { ascending: true }),
-        supabase.from("settings").select("reviews_enabled").eq("id", 1).single().catch(() => ({ data: null, error: null })),
+        supabase.from("skills").select("*").order("sort_order", { ascending: true }),
+        supabase.from("reviews").select("*").eq("enabled", true).order("sort_order", { ascending: true }),
+        supabase.from("settings").select("reviews_enabled").eq("id", 1).single(),
       ]);
-      if (profileErr) throw profileErr;
-      if (gamesErr) throw gamesErr;
-      if (toolsErr) throw toolsErr;
-      if (socialErr) throw socialErr;
 
-      setData({
-        name: profile.name,
-        title: profile.title,
-        avatar: profile.avatar,
-        aim: profile.aim,
-        gamesPublished: profile.games_published,
-        yearsActive: profile.years_active,
-        totalPlayers: profile.total_players,
-        availability: profile.availability || "Available",
-        resumeUrl: profile.resume_url || "",
-      });
-      setGames(gamesData || []);
-      setTools(toolsData || []);
-      setSocialLinks((socialData || []).filter((s) => s.url && s.url.trim() !== ""));
+      const [profileRes, gamesRes, toolsRes, socialRes, skillsRes, reviewsRes, settingsRes] = results;
 
-      if (settingsResult && settingsResult.data) {
-        setReviewsEnabled(settingsResult.data.reviews_enabled !== false);
+      if (profileRes.status === "fulfilled" && profileRes.value.data && !profileRes.value.error) {
+        const p = profileRes.value.data;
+        setData({
+          name: p.name, title: p.title, avatar: p.avatar, aim: p.aim,
+          gamesPublished: p.games_published, yearsActive: p.years_active,
+          totalPlayers: p.total_players,
+          availability: p.availability || "Available",
+          resumeUrl: p.resume_url || "",
+        });
+      } else {
+        console.warn("Profile load:", profileRes.status === "fulfilled" ? profileRes.value.error : profileRes.reason);
       }
 
-      // Separate fetches for skills and reviews (multi-row)
-      try {
-        const { data: sk } = await supabase.from("skills").select("*").order("sort_order", { ascending: true });
-        if (sk) setSkills(sk);
-      } catch {}
-      try {
-        const { data: rv } = await supabase.from("reviews").select("*").eq("enabled", true).order("sort_order", { ascending: true });
-        if (rv) setReviews(rv);
-      } catch {}
+      if (gamesRes.status === "fulfilled" && gamesRes.value.data) setGames(gamesRes.value.data);
+      if (toolsRes.status === "fulfilled" && toolsRes.value.data) setTools(toolsRes.value.data);
+      if (socialRes.status === "fulfilled" && socialRes.value.data) {
+        setSocialLinks(socialRes.value.data.filter((s) => s.url && s.url.trim() !== ""));
+      }
+      if (skillsRes.status === "fulfilled" && skillsRes.value.data) setSkills(skillsRes.value.data);
+      if (reviewsRes.status === "fulfilled" && reviewsRes.value.data) setReviews(reviewsRes.value.data);
+      if (settingsRes.status === "fulfilled" && settingsRes.value.data) {
+        setReviewsEnabled(settingsRes.value.data.reviews_enabled !== false);
+      }
     } catch (err) {
-      console.error("Failed to load portfolio data:", err.message);
+      console.error("Portfolio data load error:", err);
     } finally {
       setLoading(false);
     }
@@ -407,14 +399,23 @@ export default function Portfolio() {
             </div>
           </div>
 
-          <UniverseCard
-            avatar={data.avatar}
-            name={data.name}
-            role={data.title}
-            availability={data.availability}
-            years={data.yearsActive}
-            projectCount={data.gamesPublished}
-          />
+          {/* Orb */}
+          <div className="float orb-wrap" style={{ justifySelf: "center" }}>
+            <div className="spin-slow" style={{ position: "absolute", inset: 0, borderRadius: "50%", border: "1px solid rgba(247,147,26,0.22)" }} />
+            <div className="spin-slow-r" style={{ position: "absolute", inset: "22px", borderRadius: "50%", border: "1px dashed rgba(247,147,26,0.12)" }} />
+            <div style={{ width: "66%", height: "66%", borderRadius: "50%", background: "radial-gradient(circle at 35% 30%, #EA580C 0%, #0F0808 70%)", display: "flex", alignItems: "center", justifyContent: "center", flexDirection: "column", gap: 6, boxShadow: "0 0 70px -10px rgba(247,147,26,0.45), inset 0 0 30px rgba(0,0,0,0.5)" }}>
+              <span style={{ fontSize: "clamp(28px,4vw,46px)" }}>🎮</span>
+              <span style={{ fontFamily: "JetBrains Mono", fontSize: 11, color: "#FFD600", letterSpacing: "0.12em", textTransform: "uppercase" }}>{data.gamesPublished} Games</span>
+            </div>
+            <div className="glass float-delay" style={{ position: "absolute", top: 8, right: -28, padding: "9px 15px", minWidth: 80 }}>
+              <div style={{ fontFamily: "JetBrains Mono", fontSize: 10, color: "#94A3B8", marginBottom: 2 }}>players</div>
+              <div style={{ fontFamily: "JetBrains Mono", fontSize: 17, color: "#FFD600", fontWeight: 500 }}>{data.totalPlayers}</div>
+            </div>
+            <div className="glass float" style={{ position: "absolute", bottom: 18, left: -32, padding: "9px 15px", minWidth: 70, animationDelay: "0.7s" }}>
+              <div style={{ fontFamily: "JetBrains Mono", fontSize: 10, color: "#94A3B8", marginBottom: 2 }}>years</div>
+              <div style={{ fontFamily: "JetBrains Mono", fontSize: 17, color: "#F7931A", fontWeight: 500 }}>{data.yearsActive}+</div>
+            </div>
+          </div>
         </div>
 
         {/* Stats bar */}
