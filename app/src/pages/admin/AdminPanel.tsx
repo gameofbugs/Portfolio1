@@ -5,14 +5,20 @@ import ProfileTab from "./tabs/ProfileTab";
 import GamesTab from "./tabs/GamesTab";
 import ToolsTab from "./tabs/ToolsTab";
 import SocialTab from "./tabs/SocialTab";
+import SkillsTab from "./tabs/SkillsTab";
+import ReviewsTab from "./tabs/ReviewsTab";
+import SettingsTab from "./tabs/SettingsTab";
 
 export default function AdminPanel({ user, onLogout }) {
   const [profile, setProfile] = useState(null);
   const [games, setGames] = useState([]);
   const [tools, setTools] = useState([]);
   const [socialLinks, setSocialLinks] = useState([]);
+  const [skills, setSkills] = useState([]);
+  const [reviews, setReviews] = useState([]);
+  const [settings, setSettings] = useState(null);
   const [tab, setTab] = useState("profile");
-  const [toast, setToast] = useState(null); // { type: 'success'|'error', msg }
+  const [toast, setToast] = useState(null);
   const [saving, setSaving] = useState(false);
   const [loading, setLoading] = useState(true);
 
@@ -20,16 +26,22 @@ export default function AdminPanel({ user, onLogout }) {
   const loadAll = async () => {
     setLoading(true);
     try {
-      const [{ data: p }, { data: g }, { data: t }, { data: s }] = await Promise.all([
+      const [{ data: p }, { data: g }, { data: t }, { data: s }, { data: sk }, { data: rv }, { data: st }] = await Promise.all([
         supabase.from("profile").select("*").eq("id", 1).single(),
         supabase.from("games").select("*").order("year", { ascending: false }),
         supabase.from("tools").select("*").order("id", { ascending: true }),
         supabase.from("social_links").select("*").order("sort_order", { ascending: true }),
+        supabase.from("skills").select("*").order("sort_order", { ascending: true }),
+        supabase.from("reviews").select("*").order("sort_order", { ascending: true }),
+        supabase.from("settings").select("*").eq("id", 1).single().catch(() => ({ data: null })),
       ]);
       if (p) setProfile(p);
       if (g) setGames(g);
       if (t) setTools(t);
       if (s) setSocialLinks(s);
+      if (sk) setSkills(sk);
+      if (rv) setReviews(rv);
+      if (st) setSettings(st);
     } catch (e) {
       showToast("error", "// failed to load data");
     } finally {
@@ -57,6 +69,8 @@ export default function AdminPanel({ user, onLogout }) {
         games_published: profile.games_published,
         years_active: profile.years_active,
         total_players: profile.total_players,
+        availability: profile.availability || "Available",
+        resume_url: profile.resume_url || "",
       })
       .eq("id", 1);
     setSaving(false);
@@ -83,6 +97,8 @@ export default function AdminPanel({ user, onLogout }) {
         video_url: game.video_url || "",
         images: game.images || [],
         challenges: game.challenges,
+        featured: game.featured || false,
+        featured_order: game.featured_order || 0,
       });
     setSaving(false);
     if (error) showToast("error", "// save failed: " + error.message);
@@ -198,6 +214,89 @@ export default function AdminPanel({ user, onLogout }) {
     setSocialLinks(prev => prev.map(s => s.id === id ? { ...s, [field]: val } : s));
   };
 
+  // ── Skills CRUD ──
+  const saveSkill = async (skill) => {
+    setSaving(true);
+    const { error } = await supabase
+      .from("skills")
+      .upsert({ id: skill.id, name: skill.name, logo: skill.logo, sort_order: skill.sort_order || 0 });
+    setSaving(false);
+    if (error) showToast("error", "// save failed: " + error.message);
+    else showToast("success", `✓ "${skill.name}" saved`);
+  };
+
+  const addSkill = async () => {
+    const nextOrder = skills.length ? Math.max(...skills.map(s => s.sort_order || 0)) + 1 : 1;
+    const { data, error } = await supabase
+      .from("skills")
+      .insert({ name: "New Skill", logo: "⚡", sort_order: nextOrder })
+      .select().single();
+    if (error) showToast("error", "// failed to add skill");
+    else setSkills(prev => [...prev, data]);
+  };
+
+  const removeSkill = async (id) => {
+    const { error } = await supabase.from("skills").delete().eq("id", id);
+    if (error) showToast("error", "// failed to remove skill");
+    else {
+      setSkills(prev => prev.filter(s => s.id !== id));
+      showToast("success", "✓ Skill removed");
+    }
+  };
+
+  const updateSkillField = (id, field, val) => {
+    setSkills(prev => prev.map(s => s.id === id ? { ...s, [field]: val } : s));
+  };
+
+  // ── Reviews CRUD ──
+  const saveReview = async (review) => {
+    setSaving(true);
+    const { error } = await supabase
+      .from("reviews")
+      .upsert({
+        id: review.id, name: review.name, designation: review.designation || "",
+        text: review.text, image: review.image || "", rating: review.rating || 5,
+        enabled: review.enabled !== false, sort_order: review.sort_order || 0,
+      });
+    setSaving(false);
+    if (error) showToast("error", "// save failed: " + error.message);
+    else showToast("success", `✓ "${review.name}" saved`);
+  };
+
+  const addReview = async () => {
+    const nextOrder = reviews.length ? Math.max(...reviews.map(r => r.sort_order || 0)) + 1 : 1;
+    const { data, error } = await supabase
+      .from("reviews")
+      .insert({ name: "New Reviewer", text: "", rating: 5, enabled: true, sort_order: nextOrder })
+      .select().single();
+    if (error) showToast("error", "// failed to add review");
+    else setReviews(prev => [...prev, data]);
+  };
+
+  const removeReview = async (id) => {
+    const { error } = await supabase.from("reviews").delete().eq("id", id);
+    if (error) showToast("error", "// failed to remove review");
+    else {
+      setReviews(prev => prev.filter(r => r.id !== id));
+      showToast("success", "✓ Review removed");
+    }
+  };
+
+  const updateReviewField = (id, field, val) => {
+    setReviews(prev => prev.map(r => r.id === id ? { ...r, [field]: val } : r));
+  };
+
+  // ── Settings ──
+  const saveSettings = async () => {
+    setSaving(true);
+    const { error } = await supabase
+      .from("settings")
+      .upsert({ id: 1, reviews_enabled: settings?.reviews_enabled !== false });
+    setSaving(false);
+    if (error) showToast("error", "// save failed: " + error.message);
+    else showToast("success", "✓ Settings saved");
+  };
+
   if (loading) {
     return (
       <div style={{ minHeight: "100vh", background: "#030304", display: "flex", alignItems: "center", justifyContent: "center", flexDirection: "column", gap: 16 }}>
@@ -236,9 +335,9 @@ export default function AdminPanel({ user, onLogout }) {
       <div style={{ maxWidth: 1020, margin: "0 auto", padding: "32px 20px 60px" }}>
         {/* Tabs */}
         <div style={{ display: "flex", gap: 8, marginBottom: 32, flexWrap: "wrap" }}>
-          {["profile", "games", "tools", "social"].map(t => (
+          {["profile", "games", "tools", "skills", "reviews", "social", "settings"].map(t => (
             <button key={t} className={`tab-btn ${tab === t ? "active" : "inactive"}`} onClick={() => setTab(t)}>
-              {t === "profile" ? "👤 Profile" : t === "games" ? `🎮 Games (${games.length})` : t === "tools" ? `🔧 Tools (${tools.length})` : `🔗 Contact (${socialLinks.length})`}
+              {t === "profile" ? "👤 Profile" : t === "games" ? `🎮 Games (${games.length})` : t === "tools" ? `🔧 Tools (${tools.length})` : t === "skills" ? `⚡ Skills (${skills.length})` : t === "reviews" ? `💬 Reviews (${reviews.length})` : t === "social" ? `🔗 Contact (${socialLinks.length})` : "⚙ Settings"}
             </button>
           ))}
         </div>
@@ -265,6 +364,18 @@ export default function AdminPanel({ user, onLogout }) {
 
         {tab === "social" && (
           <SocialTab socialLinks={socialLinks} addSocial={addSocial} saveSocial={saveSocial} removeSocial={removeSocial} updateSocialField={updateSocialField} saving={saving} />
+        )}
+
+        {tab === "skills" && (
+          <SkillsTab skills={skills} addSkill={addSkill} saveSkill={saveSkill} removeSkill={removeSkill} updateSkillField={updateSkillField} saving={saving} />
+        )}
+
+        {tab === "reviews" && (
+          <ReviewsTab reviews={reviews} addReview={addReview} saveReview={saveReview} removeReview={removeReview} updateReviewField={updateReviewField} saving={saving} />
+        )}
+
+        {tab === "settings" && (
+          <SettingsTab settings={settings} setSettings={setSettings} saveSettings={saveSettings} saving={saving} />
         )}
       </div>
     </div>

@@ -67,6 +67,20 @@ export default function GamesTab({ games, addGame, saveGame, removeGame, updateG
                   <option>On Hold</option>
                 </select>
               </div>
+              <div className="field-wrap">
+                <label className="field-label">⭐ Featured Project</label>
+                <div style={{ display: "flex", gap: 12, alignItems: "center" }}>
+                  <label style={{ display: "flex", alignItems: "center", gap: 6, cursor: "pointer", fontFamily: "JetBrains Mono", fontSize: 12, color: "rgba(255,255,255,0.6)" }}>
+                    <input type="checkbox" checked={!!g.featured} onChange={e => { updateGameField(g.id, "featured", e.target.checked); if (e.target.checked && !g.featured_order) updateGameField(g.id, "featured_order", 0); }} style={{ accentColor: "#F7931A" }} />
+                    Show in Featured section
+                  </label>
+                  {g.featured && (
+                    <div>
+                      <input className="field-input" type="number" value={g.featured_order || 0} onChange={e => updateGameField(g.id, "featured_order", parseInt(e.target.value) || 0)} style={{ width: 70, padding: "6px 10px", fontSize: 12 }} placeholder="Order" />
+                    </div>
+                  )}
+                </div>
+              </div>
             </div>
 
             <div className="field-wrap">

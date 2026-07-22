@@ -25,6 +25,14 @@ export default function ProfileTab({ profile, setProfile, saveProfile, saving })
           <label className="field-label">Community / Players Stat</label>
           <input className="field-input" value={profile.total_players} onChange={e => setProfile(p => ({ ...p, total_players: e.target.value }))} placeholder="e.g. 120K+" />
         </div>
+        <div className="field-wrap">
+          <label className="field-label">Availability Status</label>
+          <input className="field-input" value={profile.availability || "Available"} onChange={e => setProfile(p => ({ ...p, availability: e.target.value }))} placeholder="e.g. Available, Open to Work, Busy" />
+        </div>
+        <div className="field-wrap">
+          <label className="field-label">Resume URL (PDF link)</label>
+          <input className="field-input" value={profile.resume_url || ""} onChange={e => setProfile(p => ({ ...p, resume_url: e.target.value }))} placeholder="https://..." />
+        </div>
       </div>
       <div className="field-wrap">
         <label className="field-label">Developer Mission Statement</label>
