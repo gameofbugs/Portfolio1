@@ -213,10 +213,10 @@ const CSS = `
   }
 `;
 
-const getDirectPdfUrl = (url) => {
+const getEmbedPdfUrl = (url) => {
   if (!url) return url;
   const match = url.match(/\/d\/([a-zA-Z0-9_-]+)/);
-  if (match) return `https://drive.google.com/uc?export=view&id=${match[1]}`;
+  if (match) return `https://docs.google.com/viewer?embedded=true&url=https://drive.google.com/uc?export=view&id=${match[1]}`;
   return url;
 };
 
@@ -452,8 +452,11 @@ export default function Portfolio() {
               back={
                 <div style={{ textAlign: "center", padding: 20 }}>
                   <p style={{ color: "rgba(255,255,255,0.9)", fontSize: 13, lineHeight: 1.6, marginBottom: 16 }}>{data.aim}</p>
-                  <div style={{ display: "flex", gap: 8, justifyContent: "center" }}>
-                    <ResumeButton onClick={() => setShowResume(true)} />
+                  <div style={{ display: "flex", gap: 8, justifyContent: "center", flexDirection: "column", alignItems: "center" }}>
+                    <p style={{ fontFamily: "JetBrains Mono", fontSize: 11, color: "rgba(255,255,255,0.5)", marginBottom: 8 }}>// flip back to see resume</p>
+                    <button className="btn-primary" onClick={() => setShowResume(true)} style={{ fontSize: 12, padding: "8px 18px" }}>
+                      Open Resume ↗
+                    </button>
                   </div>
                 </div>
               }
@@ -765,13 +768,10 @@ export default function Portfolio() {
               {data.resumeUrl ? (
                 <div>
                   <div style={{ background: "rgba(255,255,255,0.03)", borderRadius: 12, padding: 16, marginBottom: 20, border: "1px solid rgba(255,255,255,0.06)" }}>
-                    <iframe src={getDirectPdfUrl(data.resumeUrl)} title="Resume" style={{ width: "100%", height: 400, border: "none", borderRadius: 8 }} />
+                    <iframe src={getEmbedPdfUrl(data.resumeUrl)} title="Resume" style={{ width: "100%", height: 400, border: "none", borderRadius: 8 }} />
                   </div>
                   <div style={{ display: "flex", gap: 12, justifyContent: "center", flexWrap: "wrap" }}>
-                    <a href={getDirectPdfUrl(data.resumeUrl)} target="_blank" rel="noreferrer" className="btn-primary" style={{ textDecoration: "none" }}>
-                      View PDF ↗
-                    </a>
-                    <a href={getDownloadUrl(data.resumeUrl)} target="_blank" rel="noreferrer" className="btn-outline" style={{ textDecoration: "none" }}>
+                    <a href={getDownloadUrl(data.resumeUrl)} target="_blank" rel="noreferrer" className="btn-primary" style={{ textDecoration: "none" }}>
                       Download PDF ↓
                     </a>
                   </div>
