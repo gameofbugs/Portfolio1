@@ -119,8 +119,7 @@ const CSS = `
   .live-dot { display: inline-flex; align-items: center; gap: 6px; font-family: 'JetBrains Mono', monospace; font-size: 10px; color: #4ade80; letter-spacing: 0.1em; text-transform: uppercase; }
 
   .container { width: 100%; max-width: 1320px; margin: 0 auto; padding: 0 48px; }
-  .hero-grid { display: grid; grid-template-columns: 420px 1fr 300px; gap: 48px; align-items: center; }
-  .orb-wrap { width: 280px; height: 280px; position: relative; display: flex; align-items: center; justify-content: center; }
+  .hero-grid { display: flex; flex-direction: column; align-items: center; text-align: center; }
   .about-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 72px; align-items: center; }
   .stats-grid { display: grid; grid-template-columns: repeat(3,1fr); }
   .games-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(270px,1fr)); gap: 24px; align-items: start; }
@@ -175,15 +174,8 @@ const CSS = `
   .modal-overlay { position: fixed; inset: 0; z-index: 200; background: rgba(3,3,4,0.85); backdrop-filter: blur(8px); display: flex; align-items: center; justify-content: center; padding: 24px; animation: fadeIn 0.25s ease both; }
   .modal-content { background: #0F1115; border: 1px solid rgba(255,255,255,0.08); border-radius: 20px; max-width: 600px; width: 100%; max-height: 90vh; overflow-y: auto; padding: 32px; position: relative; }
 
-  @media (max-width: 1200px) {
-    .hero-grid { grid-template-columns: 320px 1fr; gap: 32px; }
-    .hero-grid .orb-wrap { display: none; }
-  }
 
   @media (max-width: 900px) {
-    .hero-grid { grid-template-columns: 1fr; text-align: center; }
-    .hero-grid .universe-parent { margin: 0 auto; }
-    .orb-wrap { width: 220px; height: 220px; justify-self: center; margin-top: 32px; }
     .about-grid { grid-template-columns: 1fr; gap: 40px; }
     .stats-grid { grid-template-columns: repeat(3,1fr); }
   }
@@ -200,7 +192,6 @@ const CSS = `
     .tools-grid { grid-template-columns: 1fr; }
     .section-pad { padding: 60px 20px; }
     .hero-pad { padding-top: 110px; padding-bottom: 60px; padding-left: 20px; padding-right: 20px; }
-    .orb-wrap { width: 180px; height: 180px; }
   }
 
   @media (max-width: 400px) {
@@ -438,34 +429,49 @@ export default function Portfolio() {
         <div style={{ position: "absolute", top: "10%", right: "12%", width: 480, height: 480, background: "#F7931A", opacity: 0.055, borderRadius: "50%", filter: "blur(130px)", pointerEvents: "none" }} />
 
         <div className="container hero-grid" style={{ position: "relative", zIndex: 1 }}>
-          {/* Profile Flip Card */}
-          <div className="fade-in" style={{ animationDelay: "0.3s" }}>
+          {/* 1. Availability pill */}
+          <div className="fade-in" style={{ animationDelay: "0.1s", marginBottom: 16 }}>
+            <span className="badge badge-gr">{data.availability}</span>
+          </div>
+
+          {/* 2. Name + title */}
+          <div className="fade-in" style={{ animationDelay: "0.2s" }}>
+            <h1 style={{ fontSize: "clamp(36px,5.5vw,72px)", fontWeight: 700, lineHeight: 1.1, marginBottom: 8 }}>{data.name}</h1>
+            <p style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: "clamp(14px,2vw,18px)", color: "#F7931A", letterSpacing: "0.08em" }}>{data.title}</p>
+          </div>
+
+          {/* 3. Tagline */}
+          <p className="fade-in" style={{ animationDelay: "0.3s", color: "#94A3B8", fontSize: 17, lineHeight: 1.75, maxWidth: 540, marginTop: 20, marginBottom: 32 }}>
+            {data.yearsActive} years shipping games that players remember.
+          </p>
+
+          {/* 4. CTA buttons */}
+          <div className="fade-in" style={{ animationDelay: "0.4s", display: "flex", gap: 14, flexWrap: "wrap", justifyContent: "center" }}>
+            <button className="btn-primary" onClick={() => scrollTo("projects")}>View Projects <span style={{ fontSize: 16 }}>↓</span></button>
+            <ResumeButton onClick={() => setShowResume(true)} />
+          </div>
+
+          {/* 5. Flip card - centerpiece */}
+          <div className="fade-in" style={{ animationDelay: "0.5s", marginTop: 56, maxWidth: 380, width: "100%" }}>
             <FlipCard
               front={
                 <div style={{ textAlign: "center", padding: 20 }}>
                   <div style={{
-                    width: 72, height: 72, borderRadius: "50%",
+                    width: 96, height: 96, borderRadius: "50%",
                     background: "linear-gradient(135deg,#EA580C,#F7931A)",
                     display: "flex", alignItems: "center", justifyContent: "center",
-                    fontSize: 28, fontWeight: 700, margin: "0 auto 16px",
-                    boxShadow: "0 0 32px -6px rgba(247,147,26,0.5)"
+                    fontSize: 36, fontWeight: 700, margin: "0 auto 12px",
+                    boxShadow: "0 0 40px -8px rgba(247,147,26,0.5)"
                   }}>
                     {data.avatar}
                   </div>
-                  <h3 style={{ fontSize: 20, fontWeight: 700, marginBottom: 4 }}>{data.name}</h3>
-                  <p style={{ fontFamily: "JetBrains Mono", fontSize: 12, color: "#F7931A", letterSpacing: "0.05em" }}>{data.title}</p>
-                  <div style={{ display: "flex", gap: 8, justifyContent: "center", marginTop: 12, flexWrap: "wrap" }}>
-                    <span className="badge badge-gr">{data.availability}</span>
-                    <span className="badge badge-o">{data.yearsActive}+ yrs</span>
-                    <span className="badge badge-g">{data.gamesPublished} projects</span>
-                  </div>
+                  <p style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 10, color: "rgba(255,255,255,0.25)", letterSpacing: "0.1em", marginTop: 8 }}>// hover to flip</p>
                 </div>
               }
               back={
                 <div style={{ textAlign: "center", padding: 20 }}>
                   <p style={{ color: "rgba(255,255,255,0.9)", fontSize: 13, lineHeight: 1.6, marginBottom: 16 }}>{data.aim}</p>
                   <div style={{ display: "flex", gap: 8, justifyContent: "center", flexDirection: "column", alignItems: "center" }}>
-                    <p style={{ fontFamily: "JetBrains Mono", fontSize: 11, color: "rgba(255,255,255,0.5)", marginBottom: 8 }}>// flip back to see resume</p>
                     <button className="btn-primary" onClick={() => setShowResume(true)} style={{ fontSize: 12, padding: "8px 18px" }}>
                       Open Resume ↗
                     </button>
@@ -475,33 +481,21 @@ export default function Portfolio() {
             />
           </div>
 
-          {/* Typewriter + CTA */}
-          <div>
+          {/* 6. Typewriter */}
+          <div className="fade-in" style={{ animationDelay: "0.6s", marginTop: 28 }}>
+            <span style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 13, color: "rgba(255,255,255,0.2)", letterSpacing: "0.05em" }}>&gt;_ </span>
             <Typewriter />
-            <p style={{ color: "#94A3B8", fontSize: 17, lineHeight: 1.75, maxWidth: 500, marginBottom: 40, marginTop: 24 }}>
-              {data.yearsActive} years shipping games that players remember.
-            </p>
-            <div className="hero-buttons" style={{ display: "flex", gap: 14, flexWrap: "wrap" }}>
-              <ResumeButton onClick={() => setShowResume(true)} />
-              <button className="btn-primary" onClick={() => scrollTo("projects")}>View Projects <span style={{ fontSize: 16 }}>↓</span></button>
-            </div>
           </div>
 
-          {/* Planet Orb */}
-          <div className="float orb-wrap" style={{ justifySelf: "center" }}>
-            <div className="spin-slow" style={{ position: "absolute", inset: 0, borderRadius: "50%", border: "1px solid rgba(247,147,26,0.22)" }} />
-            <div className="spin-slow-r" style={{ position: "absolute", inset: "22px", borderRadius: "50%", border: "1px dashed rgba(247,147,26,0.12)" }} />
-            <div style={{ width: "66%", height: "66%", borderRadius: "50%", background: "radial-gradient(circle at 35% 30%, #EA580C 0%, #0F0808 70%)", display: "flex", alignItems: "center", justifyContent: "center", flexDirection: "column", gap: 6, boxShadow: "0 0 70px -10px rgba(247,147,26,0.45), inset 0 0 30px rgba(0,0,0,0.5)" }}>
-              <span style={{ fontSize: "clamp(28px,4vw,46px)" }}>🎮</span>
-              <span style={{ fontFamily: "JetBrains Mono", fontSize: 11, color: "#FFD600", letterSpacing: "0.12em", textTransform: "uppercase" }}>{data.gamesPublished} Games</span>
+          {/* 7. Stat chips */}
+          <div className="fade-in" style={{ animationDelay: "0.7s", display: "flex", gap: 20, marginTop: 20 }}>
+            <div className="glass" style={{ padding: "8px 18px", display: "flex", alignItems: "center", gap: 8 }}>
+              <span style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 10, color: "#94A3B8", letterSpacing: "0.07em" }}>players</span>
+              <span style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 16, color: "#FFD600", fontWeight: 500 }}>{data.totalPlayers}</span>
             </div>
-            <div className="glass float-delay" style={{ position: "absolute", top: 8, right: -28, padding: "9px 15px", minWidth: 80 }}>
-              <div style={{ fontFamily: "JetBrains Mono", fontSize: 10, color: "#94A3B8", marginBottom: 2 }}>players</div>
-              <div style={{ fontFamily: "JetBrains Mono", fontSize: 17, color: "#FFD600", fontWeight: 500 }}>{data.totalPlayers}</div>
-            </div>
-            <div className="glass float" style={{ position: "absolute", bottom: 18, left: -32, padding: "9px 15px", minWidth: 70, animationDelay: "0.7s" }}>
-              <div style={{ fontFamily: "JetBrains Mono", fontSize: 10, color: "#94A3B8", marginBottom: 2 }}>years</div>
-              <div style={{ fontFamily: "JetBrains Mono", fontSize: 17, color: "#F7931A", fontWeight: 500 }}>{data.yearsActive}+</div>
+            <div className="glass" style={{ padding: "8px 18px", display: "flex", alignItems: "center", gap: 8 }}>
+              <span style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 10, color: "#94A3B8", letterSpacing: "0.07em" }}>years</span>
+              <span style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 16, color: "#F7931A", fontWeight: 500 }}>{data.yearsActive}+</span>
             </div>
           </div>
         </div>
