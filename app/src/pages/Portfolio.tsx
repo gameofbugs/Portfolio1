@@ -213,6 +213,20 @@ const CSS = `
   }
 `;
 
+const getDirectPdfUrl = (url) => {
+  if (!url) return url;
+  const match = url.match(/\/d\/([a-zA-Z0-9_-]+)/);
+  if (match) return `https://drive.google.com/uc?export=view&id=${match[1]}`;
+  return url;
+};
+
+const getDownloadUrl = (url) => {
+  if (!url) return url;
+  const match = url.match(/\/d\/([a-zA-Z0-9_-]+)/);
+  if (match) return `https://drive.google.com/uc?export=download&id=${match[1]}`;
+  return url;
+};
+
 export default function Portfolio() {
   const [data, setData] = useState(() => DEFAULT_DATA);
   const [games, setGames] = useState([]);
@@ -751,11 +765,16 @@ export default function Portfolio() {
               {data.resumeUrl ? (
                 <div>
                   <div style={{ background: "rgba(255,255,255,0.03)", borderRadius: 12, padding: 16, marginBottom: 20, border: "1px solid rgba(255,255,255,0.06)" }}>
-                    <iframe src={data.resumeUrl} title="Resume" style={{ width: "100%", height: 400, border: "none", borderRadius: 8 }} />
+                    <iframe src={getDirectPdfUrl(data.resumeUrl)} title="Resume" style={{ width: "100%", height: 400, border: "none", borderRadius: 8 }} />
                   </div>
-                  <a href={data.resumeUrl} target="_blank" rel="noreferrer" className="btn-primary" style={{ textDecoration: "none" }}>
-                    Download PDF ↓
-                  </a>
+                  <div style={{ display: "flex", gap: 12, justifyContent: "center", flexWrap: "wrap" }}>
+                    <a href={getDirectPdfUrl(data.resumeUrl)} target="_blank" rel="noreferrer" className="btn-primary" style={{ textDecoration: "none" }}>
+                      View PDF ↗
+                    </a>
+                    <a href={getDownloadUrl(data.resumeUrl)} target="_blank" rel="noreferrer" className="btn-outline" style={{ textDecoration: "none" }}>
+                      Download PDF ↓
+                    </a>
+                  </div>
                 </div>
               ) : (
                 <p style={{ color: "rgba(255,255,255,0.3)", fontFamily: "JetBrains Mono", fontSize: 13 }}>// resume not uploaded yet</p>
