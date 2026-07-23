@@ -216,7 +216,7 @@ const CSS = `
 const getEmbedPdfUrl = (url) => {
   if (!url) return url;
   const match = url.match(/\/d\/([a-zA-Z0-9_-]+)/);
-  if (match) return `https://docs.google.com/viewer?embedded=true&url=https://drive.google.com/uc?export=view&id=${match[1]}`;
+  if (match) return `https://docs.google.com/viewerng/viewer?url=${encodeURIComponent(`https://drive.google.com/uc?export=view&id=${match[1]}`)}&embedded=true`;
   return url;
 };
 
