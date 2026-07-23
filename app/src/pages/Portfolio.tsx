@@ -244,6 +244,8 @@ export default function Portfolio() {
   const [contactDone, setContactDone] = useState(false);
   const [contactErr, setContactErr] = useState("");
 
+  const anyModalOpen = detailGame || showResume;
+
   const loadData = useCallback(async () => {
     try {
       const results = await Promise.allSettled([
@@ -309,6 +311,15 @@ export default function Portfolio() {
   }, []);
 
   useEffect(() => {
+    if (anyModalOpen) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "";
+    }
+    return () => { document.body.style.overflow = ""; };
+  }, [anyModalOpen]);
+
+  useEffect(() => {
     const onScroll = () => {
       const sections = ["hero", "projects", "skills", "about", "contact"];
       let current = "hero";
@@ -318,9 +329,10 @@ export default function Portfolio() {
       }
       setActiveSection(current);
     };
-    window.addEventListener("scroll", onScroll, { passive: true });
+    if (!anyModalOpen) window.addEventListener("scroll", onScroll, { passive: true });
+    else window.removeEventListener("scroll", onScroll);
     return () => window.removeEventListener("scroll", onScroll);
-  }, []);
+  }, [anyModalOpen]);
 
   const scrollTo = (id) => {
     const el = document.getElementById(id);
